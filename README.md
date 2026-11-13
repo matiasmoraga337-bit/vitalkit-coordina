@@ -95,6 +95,7 @@ docs/
 - [Guion de demo](docs/demo.md)
 - [Arquitectura](docs/arquitectura.md)
 - [Recursos gratuitos](docs/recursos.md)
+- [Deploy en Vercel](docs/deploy.md)
 
 ## Entregables H2
 
