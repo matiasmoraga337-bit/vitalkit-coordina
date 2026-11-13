@@ -10,6 +10,10 @@ import {
   UserRound,
 } from "lucide-react";
 import { AppShell } from "@/components/app/app-shell";
+import { requireRole } from "@/lib/auth";
+import { createRequest } from "@/app/actions/visits";
+import { getFamilyDashboard } from "@/lib/data/family";
+import { getInitials } from "@/lib/auth/roles";
 import { RequestStatusBadge, VisitStatusBadge } from "@/components/app/status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -21,34 +25,97 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import {
-  demoCarePlan,
-  demoHousehold,
-  demoRequests,
-  demoVisits,
-  disciplineMeta,
-} from "@/lib/mock-data";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { disciplineMeta } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
-const nextVisit = demoVisits[0];
-const lastReport = demoVisits.find((visit) => visit.status === "completed");
-const pendingRequest = demoRequests.find((request) => request.status === "pending");
+export const instant = false;
 
-export default function FamilyHomePage() {
+export default async function FamilyHomePage() {
+  const { supabase, profile } = await requireRole("family");
+  const data = await getFamilyDashboard(supabase, profile.id, profile.full_name);
+
+  if (!data) {
+    return (
+      <AppShell
+        role="family"
+        user={{
+          name: profile.full_name,
+          detail: "Sin hogar asignado",
+          initials: getInitials(profile.full_name),
+        }}
+      >
+        <Card>
+          <CardHeader>
+            <CardTitle>Sin hogar asignado</CardTitle>
+            <CardDescription>
+              La coordinadora todavía no vinculó tu cuenta a un hogar.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </AppShell>
+    );
+  }
+
+  const { household, visits, requests, carePlan, stats } = data;
+  const nextVisit = visits.find(
+    (visit) => visit.status !== "completed" && visit.status !== "cancelled",
+  );
+  const lastReport = visits
+    .filter((visit) => visit.status === "completed" && visit.note)
+    .at(-1);
+  const pendingRequest = requests.find((request) => request.status === "pending");
+  const carePlanData = carePlan ?? {
+    goals: [],
+    frequency: "Sin plan de cuidados",
+    recommendations: [],
+    nextReview: "Sin fecha",
+  };
+
+  if (!nextVisit) {
+    return (
+      <AppShell
+        role="family"
+        user={{
+          name: profile.full_name,
+          detail: `${household.plan} · ${household.elderName}`,
+          initials: getInitials(profile.full_name),
+        }}
+      >
+        <Card>
+          <CardHeader>
+            <CardTitle>Sin visitas programadas</CardTitle>
+            <CardDescription>
+              La coordinadora todavía no agendó la próxima visita.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </AppShell>
+    );
+  }
+
   return (
-    <AppShell role="family">
+    <AppShell
+      role="family"
+      user={{
+        name: profile.full_name,
+        detail: `${household.plan} · ${household.elderName}`,
+        initials: getInitials(profile.full_name),
+      }}
+    >
       <div className="space-y-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-sm font-medium text-muted-foreground">
-              Hola, {demoHousehold.contactName.split(" ")[0]}
+              Hola, {household.contactName.split(" ")[0]}
             </p>
             <h1 className="mt-1 font-heading text-2xl font-bold tracking-tight sm:text-3xl">
               El cuidado de Elena, en un solo lugar.
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Plan {demoHousehold.plan} · {demoHousehold.comuna} · coordinadora{" "}
-              {demoHousehold.coordinator}
+              Plan {household.plan} · {household.comuna} · coordinadora{" "}
+              {household.coordinator}
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -56,7 +123,7 @@ export default function FamilyHomePage() {
               Plan activo
             </Badge>
             <Badge variant="outline" className="rounded-full">
-              {demoHousehold.plan} · ${demoHousehold.planPrice.toLocaleString("es-CL")}/mes
+              {household.plan} · ${household.planPrice.toLocaleString("es-CL")}/mes
             </Badge>
           </div>
         </div>
@@ -87,11 +154,11 @@ export default function FamilyHomePage() {
           <Card>
             <CardHeader className="pb-2">
               <CardDescription>Visitas este mes</CardDescription>
-              <CardTitle className="text-lg">6 de 8</CardTitle>
+              <CardTitle className="text-lg">{stats.visitsThisMonth} de {stats.planVisits}</CardTitle>
             </CardHeader>
             <CardContent className="flex items-center gap-2 text-sm text-muted-foreground">
               <CalendarDays className="size-4 text-primary" />
-              2 programadas
+              {stats.upcoming} programadas
             </CardContent>
           </Card>
           <Card>
@@ -154,8 +221,9 @@ export default function FamilyHomePage() {
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">
-                Los botones se habilitarán cuando conectemos Supabase y la
-                autenticación.
+                La información viene de Supabase. La solicitud de visita extra
+                ya está habilitada; el resto de las acciones llegará en la
+                siguiente iteración.
               </p>
             </CardContent>
           </Card>
@@ -206,7 +274,7 @@ export default function FamilyHomePage() {
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   Frecuencia
                 </p>
-                <p className="mt-1 text-sm leading-6">{demoCarePlan.frequency}</p>
+                <p className="mt-1 text-sm leading-6">{carePlanData.frequency}</p>
               </div>
               <Separator />
               <div>
@@ -214,7 +282,7 @@ export default function FamilyHomePage() {
                   Objetivos
                 </p>
                 <ul className="mt-2 space-y-2 text-sm leading-6 text-muted-foreground">
-                  {demoCarePlan.goals.map((goal) => (
+                  {carePlanData.goals.map((goal) => (
                     <li key={goal} className="flex gap-2">
                       <span className="mt-2 size-1.5 shrink-0 rounded-full bg-primary" />
                       {goal}
@@ -223,7 +291,7 @@ export default function FamilyHomePage() {
                 </ul>
               </div>
               <p className="text-xs text-muted-foreground">
-                Próxima revisión: {demoCarePlan.nextReview}
+                Próxima revisión: {carePlanData.nextReview}
               </p>
             </CardContent>
           </Card>
@@ -239,7 +307,7 @@ export default function FamilyHomePage() {
               </Link>
             </CardHeader>
             <CardContent className="space-y-3">
-              {demoRequests.map((request) => (
+              {requests.map((request) => (
                 <div
                   key={request.id}
                   className="flex flex-col gap-2 rounded-xl border p-3 sm:flex-row sm:items-center sm:justify-between"
@@ -255,6 +323,51 @@ export default function FamilyHomePage() {
                   <RequestStatusBadge status={request.status} />
                 </div>
               ))}
+              <details className="rounded-xl border p-3">
+                <summary className="cursor-pointer text-sm font-semibold text-primary">
+                  Pedir visita extra
+                </summary>
+                <form action={createRequest} className="mt-3 space-y-2">
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    <label className="space-y-1 text-xs font-medium">
+                      Disciplina
+                      <select
+                        name="discipline"
+                        required
+                        className="h-9 w-full rounded-lg border bg-background px-2.5 text-sm"
+                      >
+                        <option value="kinesiologia">Kinesiolog?a</option>
+                        <option value="nutricion">Nutrici?n</option>
+                        <option value="enfermeria">Enfermer?a</option>
+                        <option value="aseo">Aseo</option>
+                      </select>
+                    </label>
+                    <label className="space-y-1 text-xs font-medium">
+                      Fecha preferida
+                      <Input name="preferred_date" type="date" />
+                    </label>
+                  </div>
+                  <label className="space-y-1 text-xs font-medium">
+                    Hora preferida
+                    <Input name="preferred_time" type="time" />
+                  </label>
+                  <label className="space-y-1 text-xs font-medium">
+                    Motivo
+                    <Textarea
+                      name="reason"
+                      required
+                      rows={3}
+                      placeholder="Cu?ntanos qu? necesita Elena."
+                    />
+                  </label>
+                  <button
+                    type="submit"
+                    className={cn(buttonVariants({ size: "sm" }), "w-full")}
+                  >
+                    Enviar solicitud
+                  </button>
+                </form>
+              </details>
               <div className="flex flex-wrap gap-2 pt-1">
                 <Button variant="outline" disabled>
                   <Receipt className="size-4" />

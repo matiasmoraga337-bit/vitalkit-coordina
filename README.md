@@ -9,7 +9,7 @@ PWA de coordinación de cuidado domiciliario para familias de Puerto Montt. Cone
 - [x] Repositorio y scaffold Next.js
 - [x] Sistema visual y vistas demo de los tres roles
 - [x] Documentación de alcance, datos, demo y arquitectura
-- [ ] Supabase: schema, RLS y seed
+- [x] Supabase: schema, RLS y seed
 - [ ] Autenticación y selector de rol real
 - [ ] Solicitud → asignación → check-in → reporte persistente
 - [x] PWA: manifest y service worker básico
@@ -29,10 +29,12 @@ PWA de coordinación de cuidado domiciliario para familias de Puerto Montt. Cone
 ```powershell
 npm install
 Copy-Item .env.example .env.local
+# Completa las llaves de Supabase en .env.local
+npm run seed
 npm run dev
 ```
 
-Abrir [http://localhost:3000](http://localhost:3000).
+Abrir [http://localhost:3000](http://localhost:3000) y usar los botones demo de `/demo` o `/login`. No necesitas escribir contrase?a para la demo.
 
 ## Scripts
 
@@ -42,7 +44,16 @@ npm run lint       # eslint
 npm run typecheck  # tsc --noEmit
 npm run build      # build de producción
 npm run check      # lint + typecheck + build
+npm run seed       # crea usuarios y datos demo en Supabase
 ```
+
+## Supabase
+
+- Proyecto: `vitalkit-coordina` (S?o Paulo).
+- Migraciones en `supabase/migrations/`.
+- Seed demo en `scripts/seed.mjs`.
+- RLS activo en todas las tablas.
+- La `SERVICE_ROLE_KEY` solo vive en `.env.local`; no se commitea.
 
 ## Rutas
 

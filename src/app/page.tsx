@@ -84,7 +84,7 @@ export default function HomePage() {
             >
               Ver demo
             </Link>
-            <Link href="/inicio" className={buttonVariants({ size: "sm" })}>
+            <Link href="/login" className={buttonVariants({ size: "sm" })}>
               Entrar
               <ArrowRight className="size-4" />
             </Link>
@@ -114,7 +114,7 @@ export default function HomePage() {
                   <ArrowRight className="size-4" />
                 </Link>
                 <Link
-                  href="/inicio"
+                  href="/login"
                   className={buttonVariants({ variant: "outline", size: "lg" })}
                 >
                   Entrar como familia

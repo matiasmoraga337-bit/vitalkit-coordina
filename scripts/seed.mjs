@@ -121,7 +121,7 @@ async function resetDemoHousehold() {
   const { data, error } = await supabase
     .from("households")
     .select("id")
-    .eq("name", "Familia Rojas Demo");
+    .in("name", ["Familia Rojas", "Familia Rojas Demo"]);
 
   if (error) throw error;
 
@@ -141,7 +141,7 @@ async function main() {
   const { data: household, error: householdError } = await supabase
     .from("households")
     .insert({
-      name: "Familia Rojas Demo",
+      name: "Familia Rojas",
       comuna: "Puerto Montt",
       address: "Villa Los Volcanes, Puerto Montt",
       plan_id: "integral",

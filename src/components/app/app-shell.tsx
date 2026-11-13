@@ -10,6 +10,7 @@ import {
   Home,
   Inbox,
   LayoutDashboard,
+  LogOut,
   Menu,
   Receipt,
   UserCheck,
@@ -28,6 +29,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import type { Role } from "@/lib/mock-data";
+import { signOut } from "@/app/actions/auth";
 
 type NavItem = {
   label: string;
@@ -88,9 +90,14 @@ const roleConfig: Record<
   },
 };
 
-function SidebarContent({ role }: { role: Role }) {
+function SidebarContent({ role, user }: { role: Role; user?: { name: string; detail: string; initials: string } }) {
   const pathname = usePathname();
   const config = roleConfig[role];
+  const displayUser = user ?? {
+    name: config.userName,
+    detail: config.userDetail,
+    initials: config.initials,
+  };
 
   return (
     <div className="flex h-full flex-col">
@@ -153,13 +160,24 @@ function SidebarContent({ role }: { role: Role }) {
       <div className="border-t p-4">
         <div className="flex items-center gap-3 rounded-xl bg-muted/60 p-3">
           <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary/10 text-xs font-bold text-primary">
-            {config.initials}
+            {displayUser.initials}
           </span>
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold">{config.userName}</p>
-            <p className="truncate text-xs text-muted-foreground">{config.userDetail}</p>
+            <p className="truncate text-sm font-semibold">{displayUser.name}</p>
+            <p className="truncate text-xs text-muted-foreground">{displayUser.detail}</p>
           </div>
         </div>
+        <form action={signOut} className="mt-2">
+          <Button
+            type="submit"
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start text-muted-foreground"
+          >
+            <LogOut className="size-4" />
+            Cerrar sesión
+          </Button>
+        </form>
         <p className="mt-3 px-1 text-[11px] leading-relaxed text-muted-foreground">
           MVP en construcción · datos de demostración
         </p>
@@ -168,11 +186,19 @@ function SidebarContent({ role }: { role: Role }) {
   );
 }
 
-export function AppShell({ role, children }: { role: Role; children: React.ReactNode }) {
+export function AppShell({
+  role,
+  user,
+  children,
+}: {
+  role: Role;
+  user?: { name: string; detail: string; initials: string };
+  children: React.ReactNode;
+}) {
   return (
     <div className="min-h-dvh bg-background">
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 border-r bg-card lg:block">
-        <SidebarContent role={role} />
+        <SidebarContent role={role} user={user} />
       </aside>
 
       <div className="lg:pl-64">
@@ -189,7 +215,7 @@ export function AppShell({ role, children }: { role: Role; children: React.React
               <SheetHeader className="sr-only">
                 <SheetTitle>Menú de navegación</SheetTitle>
               </SheetHeader>
-              <SidebarContent role={role} />
+              <SidebarContent role={role} user={user} />
             </SheetContent>
           </Sheet>
           <Logo compact />

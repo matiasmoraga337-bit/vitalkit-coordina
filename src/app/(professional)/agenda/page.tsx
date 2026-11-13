@@ -8,9 +8,14 @@ import {
   PlayCircle,
 } from "lucide-react";
 import { AppShell } from "@/components/app/app-shell";
+import { requireRole } from "@/lib/auth";
+import { completeVisit, startVisit } from "@/app/actions/visits";
+import { getProfessionalAgenda } from "@/lib/data/professional";
+import { getInitials } from "@/lib/auth/roles";
 import { VisitStatusBadge } from "@/components/app/status-badge";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Card,
   CardContent,
@@ -18,17 +23,38 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  demoProfessionalAgenda,
-  disciplineMeta,
-} from "@/lib/mock-data";
+import { disciplineMeta } from "@/lib/mock-data";
+import { formatLongDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-const currentVisit = demoProfessionalAgenda[0];
+export const instant = false;
 
-export default function ProfessionalAgendaPage() {
+export default async function ProfessionalAgendaPage() {
+  const { supabase, profile } = await requireRole("professional");
+  const data = await getProfessionalAgenda(supabase, profile.id);
+  const currentVisit = data.currentVisit ?? {
+    id: "empty",
+    household: "Sin visitas",
+    patient: "Sin visitas asignadas",
+    discipline: data.discipline,
+    date: "?",
+    time: "?",
+    address: "?",
+    status: "scheduled" as const,
+  };
+  const agendaVisits = data.visits.filter(
+    (visit) => visit.status !== "completed" && visit.status !== "cancelled",
+  );
+
   return (
-    <AppShell role="professional">
+    <AppShell
+      role="professional"
+      user={{
+        name: profile.full_name,
+        detail: "Kinesiólogo · Puerto Montt",
+        initials: getInitials(profile.full_name),
+      }}
+    >
       <div className="space-y-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -36,7 +62,8 @@ export default function ProfessionalAgendaPage() {
               Agenda del profesional
             </p>
             <h1 className="mt-1 font-heading text-2xl font-bold tracking-tight sm:text-3xl">
-              Hola, Diego. Tienes 3 visitas.
+              Hola, {profile.full_name.split(" ")[0]}. Tienes {agendaVisits.length}{" "}
+              {agendaVisits.length === 1 ? "visita" : "visitas"}.
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
               Revisa tu ruta, registra el check-in y deja la nota de cada visita.
@@ -44,7 +71,7 @@ export default function ProfessionalAgendaPage() {
           </div>
           <Badge className="w-fit rounded-full bg-sky-100 text-sky-800 hover:bg-sky-100">
             <CalendarDays className="size-3.5" />
-            Viernes 14 de noviembre
+            {formatLongDate()}
           </Badge>
         </div>
 
@@ -52,31 +79,33 @@ export default function ProfessionalAgendaPage() {
           <Card>
             <CardHeader className="pb-2">
               <CardDescription>Visitas de hoy</CardDescription>
-              <CardTitle className="font-heading text-3xl">2</CardTitle>
+              <CardTitle className="font-heading text-3xl">{data.stats.visitsToday}</CardTitle>
             </CardHeader>
             <CardContent className="flex items-center gap-2 text-sm text-muted-foreground">
               <Clock3 className="size-4 text-primary" />
-              10:30 y 12:00
+              {data.stats.visitsToday > 0 ? `${data.stats.visitsToday} en agenda` : "Sin visitas hoy"}
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="pb-2">
-              <CardDescription>Completadas</CardDescription>
-              <CardTitle className="font-heading text-3xl">0</CardTitle>
+              <CardDescription>Completadas hoy</CardDescription>
+              <CardTitle className="font-heading text-3xl">{data.stats.completedToday}</CardTitle>
             </CardHeader>
             <CardContent className="flex items-center gap-2 text-sm text-muted-foreground">
               <CheckCircle2 className="size-4 text-emerald-600" />
-              Sin cierres aún
+              {data.stats.completedToday > 0 ? "Visitas cerradas" : "Sin cierres aún"}
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="pb-2">
               <CardDescription>Próxima visita</CardDescription>
-              <CardTitle className="text-lg">10:30 · Familia Rojas</CardTitle>
+              <CardTitle className="text-lg">
+                {currentVisit.time} · {currentVisit.household}
+              </CardTitle>
             </CardHeader>
             <CardContent className="flex items-center gap-2 text-sm text-muted-foreground">
               <MapPin className="size-4 text-primary" />
-              Villa Los Volcanes
+              {currentVisit.address}
             </CardContent>
           </Card>
         </div>
@@ -89,11 +118,11 @@ export default function ProfessionalAgendaPage() {
                 <CardTitle className="text-xl">Próximas visitas</CardTitle>
               </div>
               <Badge variant="outline" className="rounded-full">
-                Kinesiología
+                {disciplineMeta[data.discipline].label}
               </Badge>
             </CardHeader>
             <CardContent className="space-y-3">
-              {demoProfessionalAgenda.map((visit) => (
+              {agendaVisits.map((visit) => (
                 <div
                   key={visit.id}
                   className="flex flex-col gap-3 rounded-xl border p-3 sm:flex-row sm:items-center"
@@ -142,23 +171,62 @@ export default function ProfessionalAgendaPage() {
                   {currentVisit.date} · {currentVisit.time} hrs
                 </p>
               </div>
-              <div className="grid gap-2">
-                <Button disabled>
-                  <PlayCircle className="size-4" />
-                  Hacer check-in
-                </Button>
-                <Button variant="outline" disabled>
-                  <NotebookPen className="size-4" />
-                  Escribir nota de visita
-                </Button>
-                <Button variant="ghost" disabled>
-                  <Navigation className="size-4" />
-                  Ver ruta
-                </Button>
-              </div>
+              {data.currentVisit ? (
+                <div className="space-y-2">
+                  {currentVisit.status !== "in_progress" && (
+                    <form action={startVisit}>
+                      <input
+                        type="hidden"
+                        name="visit_id"
+                        value={data.currentVisit.id}
+                      />
+                      <button
+                        type="submit"
+                        className={cn(buttonVariants(), "w-full")}
+                      >
+                        <PlayCircle className="size-4" />
+                        Hacer check-in
+                      </button>
+                    </form>
+                  )}
+                  <details className="rounded-xl border p-3">
+                    <summary className="cursor-pointer text-sm font-semibold text-primary">
+                      Escribir nota de visita
+                    </summary>
+                    <form action={completeVisit} className="mt-3 space-y-2">
+                      <input
+                        type="hidden"
+                        name="visit_id"
+                        value={data.currentVisit.id}
+                      />
+                      <Textarea
+                        name="summary"
+                        required
+                        rows={3}
+                        placeholder="Resumen de la visita, avances y recomendaciones."
+                      />
+                      <button
+                        type="submit"
+                        className={cn(buttonVariants({ size: "sm" }), "w-full")}
+                      >
+                        <NotebookPen className="size-4" />
+                        Guardar y completar
+                      </button>
+                    </form>
+                  </details>
+                  <Button variant="ghost" className="w-full" disabled>
+                    <Navigation className="size-4" />
+                    Ver ruta
+                  </Button>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  No hay visitas pendientes.
+                </p>
+              )}
               <p className="text-xs leading-5 text-muted-foreground">
-                El check-in y la nota se conectarán a Supabase en la siguiente
-                etapa.
+                El check-in y la nota se guardan en Supabase. “Ver ruta” se
+                habilitará en la siguiente iteración.
               </p>
             </CardContent>
           </Card>

@@ -9,9 +9,14 @@ import {
   Users,
 } from "lucide-react";
 import { AppShell } from "@/components/app/app-shell";
+import { requireRole } from "@/lib/auth";
+import { approveRequest } from "@/app/actions/visits";
+import { getCoordinatorDashboard } from "@/lib/data/coordinator";
+import { getInitials } from "@/lib/auth/roles";
 import { RequestStatusBadge, VisitStatusBadge } from "@/components/app/status-badge";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
@@ -19,20 +24,24 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  demoCoordinatorStats,
-  demoRequests,
-  demoVisits,
-  disciplineMeta,
-} from "@/lib/mock-data";
+import { disciplineMeta } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
-const upcomingVisits = demoVisits.filter((visit) => visit.status !== "completed");
-const pendingRequests = demoRequests.filter((request) => request.status === "pending");
+export const instant = false;
 
-export default function CoordinatorDashboardPage() {
+export default async function CoordinatorDashboardPage() {
+  const { supabase, profile } = await requireRole("coordinator");
+  const data = await getCoordinatorDashboard(supabase);
+  const pendingRequests = data.requests.filter((request) => request.status === "pending");
   return (
-    <AppShell role="coordinator">
+    <AppShell
+      role="coordinator"
+      user={{
+        name: profile.full_name,
+        detail: "Coordinadora del piloto",
+        initials: getInitials(profile.full_name),
+      }}
+    >
       <div className="space-y-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -40,7 +49,7 @@ export default function CoordinatorDashboardPage() {
               Tablero de coordinación
             </p>
             <h1 className="mt-1 font-heading text-2xl font-bold tracking-tight sm:text-3xl">
-              Tienes {demoCoordinatorStats.visitsToday} visitas en agenda.
+              Tienes {data.stats.pendingVisits} visitas en agenda.
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
               Revisa lo que falta asignar, las solicitudes pendientes y las
@@ -49,7 +58,8 @@ export default function CoordinatorDashboardPage() {
           </div>
           <Badge className="w-fit rounded-full bg-amber-100 text-amber-800 hover:bg-amber-100">
             <AlertCircle className="size-3.5" />
-            {demoCoordinatorStats.unassigned} visita sin asignar
+            {data.stats.unassigned}{" "}
+            {data.stats.unassigned === 1 ? "visita sin asignar" : "visitas sin asignar"}
           </Badge>
         </div>
 
@@ -58,43 +68,44 @@ export default function CoordinatorDashboardPage() {
             <CardHeader className="pb-2">
               <CardDescription>Visitas en agenda</CardDescription>
               <CardTitle className="font-heading text-3xl">
-                {demoCoordinatorStats.visitsToday}
+                {data.stats.pendingVisits}
               </CardTitle>
             </CardHeader>
             <CardContent className="flex items-center gap-2 text-sm text-muted-foreground">
               <CalendarClock className="size-4 text-primary" />
-              1 hoy · 4 próximas
+              {data.stats.visitsToday} hoy ·{" "}
+              {Math.max(data.stats.pendingVisits - data.stats.visitsToday, 0)} próximas
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="pb-2">
               <CardDescription>Sin asignar</CardDescription>
               <CardTitle className="font-heading text-3xl">
-                {demoCoordinatorStats.unassigned}
+                {data.stats.unassigned}
               </CardTitle>
             </CardHeader>
             <CardContent className="flex items-center gap-2 text-sm text-muted-foreground">
               <CircleDashed className="size-4 text-amber-600" />
-              Requiere acción
+              {data.stats.unassigned > 0 ? "Requiere acción" : "Todo asignado"}
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="pb-2">
               <CardDescription>Solicitudes pendientes</CardDescription>
               <CardTitle className="font-heading text-3xl">
-                {demoCoordinatorStats.pendingRequests}
+                {data.stats.pendingRequests}
               </CardTitle>
             </CardHeader>
             <CardContent className="flex items-center gap-2 text-sm text-muted-foreground">
               <Inbox className="size-4 text-primary" />
-              Prioridad media
+              {data.stats.pendingRequests > 0 ? "Requiere revisión" : "Sin pendientes"}
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="pb-2">
               <CardDescription>Familias activas</CardDescription>
               <CardTitle className="font-heading text-3xl">
-                {demoCoordinatorStats.activeHouseholds}
+                {data.stats.activeHouseholds}
               </CardTitle>
             </CardHeader>
             <CardContent className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -116,7 +127,7 @@ export default function CoordinatorDashboardPage() {
               </Button>
             </CardHeader>
             <CardContent className="space-y-3">
-              {upcomingVisits.map((visit) => (
+              {data.visits.map((visit) => (
                 <div
                   key={visit.id}
                   className="flex flex-col gap-3 rounded-xl border p-3 sm:flex-row sm:items-center"
@@ -148,7 +159,7 @@ export default function CoordinatorDashboardPage() {
                   </div>
                 </div>
               ))}
-              {upcomingVisits.length === 0 && (
+              {data.visits.length === 0 && (
                 <p className="text-sm text-muted-foreground">
                   No hay visitas pendientes para hoy.
                 </p>
@@ -175,14 +186,37 @@ export default function CoordinatorDashboardPage() {
                       {request.requestedBy} · {request.date}
                     </p>
                     <p className="mt-2 text-sm leading-6">{request.reason}</p>
-                    <div className="mt-3 flex gap-2">
-                      <Button size="sm" disabled>
-                        Asignar
-                      </Button>
-                      <Button size="sm" variant="outline" disabled>
-                        Revisar
-                      </Button>
-                    </div>
+                    <form action={approveRequest} className="mt-3 space-y-2">
+                      <input type="hidden" name="request_id" value={request.id} />
+                      <select
+                        name="professional_id"
+                        required
+                        className="h-9 w-full rounded-lg border bg-background px-2.5 text-sm"
+                      >
+                        <option value="">Selecciona profesional</option>
+                        {data.professionals
+                          .filter(
+                            (professional) =>
+                              professional.discipline === request.discipline,
+                          )
+                          .map((professional) => (
+                            <option key={professional.id} value={professional.id}>
+                              {professional.name}
+                            </option>
+                          ))}
+                      </select>
+                      <Input
+                        name="scheduled_at"
+                        type="datetime-local"
+                        required
+                      />
+                      <button
+                        type="submit"
+                        className={cn(buttonVariants({ size: "sm" }), "w-full")}
+                      >
+                        Aprobar y asignar
+                      </button>
+                    </form>
                   </div>
                 ))}
                 {pendingRequests.length === 0 && (
@@ -202,22 +236,21 @@ export default function CoordinatorDashboardPage() {
                 <UserCheck className="size-5 text-primary" />
               </CardHeader>
               <CardContent className="space-y-3 text-sm">
-                {[
-                  ["Diego Pérez", "Kinesiología", "3 visitas hoy"],
-                  ["Andrea Silva", "Enfermería", "1 visita hoy"],
-                  ["Camila Muñoz", "Nutrición", "Sin visitas hoy"],
-                ].map(([name, role, detail]) => (
-                  <div key={name} className="flex items-center gap-3">
+                {data.professionals.map((professional) => (
+                  <div key={professional.id} className="flex items-center gap-3">
                     <span className="grid size-8 place-items-center rounded-full bg-primary/10 text-[10px] font-bold text-primary">
-                      {name
+                      {professional.name
                         .split(" ")
                         .map((part) => part[0])
                         .join("")}
                     </span>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate font-medium">{name}</p>
+                      <p className="truncate font-medium">{professional.name}</p>
                       <p className="truncate text-xs text-muted-foreground">
-                        {role} · {detail}
+                        {disciplineMeta[professional.discipline].label} ·{" "}
+                        {professional.visitsToday > 0
+                          ? `${professional.visitsToday} visita(s) hoy`
+                          : "Sin visitas hoy"}
                       </p>
                     </div>
                     <CheckCircle2 className="size-4 text-emerald-600" />

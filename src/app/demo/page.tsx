@@ -16,37 +16,38 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { demoLogin } from "@/app/actions/auth";
 import { cn } from "@/lib/utils";
 
 const demos = [
   {
+    role: "family",
     title: "Entrar como familia",
     description:
       "Carolina Rojas · plan Integral. Ve la próxima visita, el reporte y el plan de cuidado de Elena.",
-    href: "/inicio",
     icon: UserRound,
     accent: "bg-sky-50 text-sky-700",
     cta: "Abrir vista familia",
   },
   {
+    role: "coordinator",
     title: "Entrar como coordinadora",
     description:
       "Valentina Soto. Revisa el tablero del día, las solicitudes pendientes y las visitas sin asignar.",
-    href: "/tablero",
     icon: LayoutDashboard,
     accent: "bg-teal-50 text-teal-700",
     cta: "Abrir tablero",
   },
   {
+    role: "professional",
     title: "Entrar como profesional",
     description:
       "Diego Pérez · kinesiólogo. Revisa su agenda, la visita de hoy y el registro de atención.",
-    href: "/agenda",
     icon: ClipboardCheck,
     accent: "bg-orange-50 text-orange-700",
     cta: "Abrir agenda",
   },
-];
+] as const;
 
 export default function DemoPage() {
   return (
@@ -78,17 +79,16 @@ export default function DemoPage() {
             Elige un rol y prueba el flujo.
           </h1>
           <p className="mt-3 text-sm leading-6 text-muted-foreground sm:text-base">
-            Los datos son de demostración. La autenticación real con Supabase se
-            conectará en la siguiente etapa; por ahora cada botón abre la vista
-            del rol con información de ejemplo.
+            Los datos son de demostración. Cada botón inicia sesión con la cuenta
+            demo del rol y abre su vista.
           </p>
         </div>
 
-        <div className="mt-8 grid gap-4 md:grid-cols-3">
+        <form action={demoLogin} className="mt-8 grid gap-4 md:grid-cols-3">
           {demos.map((demo) => {
             const Icon = demo.icon;
             return (
-              <Card key={demo.title} className="flex h-full flex-col">
+              <Card key={demo.role} className="flex h-full flex-col">
                 <CardHeader>
                   <span className={cn("grid size-11 place-items-center rounded-xl", demo.accent)}>
                     <Icon className="size-5" />
@@ -99,20 +99,28 @@ export default function DemoPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="mt-auto">
-                  <Link href={demo.href} className={cn(buttonVariants(), "w-full")}>
+                  <button
+                    type="submit"
+                    name="role"
+                    value={demo.role}
+                    className={cn(buttonVariants(), "w-full")}
+                  >
                     {demo.cta}
                     <ArrowRight className="size-4" />
-                  </Link>
+                  </button>
                 </CardContent>
               </Card>
             );
           })}
-        </div>
+        </form>
 
         <p className="mt-8 rounded-xl border border-dashed bg-muted/40 p-4 text-xs leading-5 text-muted-foreground">
-          Esta demo todavía no escribe en la base de datos. El siguiente hito es
-          conectar Supabase, crear las cuentas demo y persistir solicitudes,
-          asignaciones y reportes.
+          Esta demo usa las cuentas seed de Supabase. Para entrar con correo y
+          contraseña, usa{" "}
+          <Link href="/login" className="font-semibold text-primary hover:underline">
+            la pantalla de login
+          </Link>
+          .
         </p>
       </main>
     </div>
