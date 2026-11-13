@@ -14,21 +14,24 @@
 ```text
 /                       Entrada y presentación del MVP
 /demo                   Selector de rol
+/login                  Login y cuentas demo
 /inicio                 Vista familia
-/tablero                Vista coordinación
-/agenda                 Vista profesional
-```
-
-Rutas futuras:
-
-```text
 /calendario             Calendario familiar
-/visitas/[id]           Detalle de visita
-/solicitudes            Solicitudes familia/coordinación
+/visitas/[id]           Detalle compartido de visita
+/solicitudes            Solicitudes familia
 /plan                   Plan de cuidados
 /factura                Factura simulada
-/casos/[id]             Caso de coordinación
-/disponibilidad         Disponibilidad profesional
+/mensajes               Chat familia ↔ coordinación
+/mensajes/[householdId] Hilo por hogar
+/tablero                Vista coordinación
+/casos                  Hogares del piloto
+/casos/[id]             Caso completo
+/solicitudes-coordinacion Bandeja de solicitudes
+/profesionales          Equipo y verificación
+/calendario-coordinacion Agenda global
+/agenda                 Vista profesional
+/visitas                Historial del profesional
+/disponibilidad         Disponibilidad semanal
 ```
 
 ## Autenticación

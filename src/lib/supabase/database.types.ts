@@ -39,6 +39,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      availability: {
+        Row: {
+          active: boolean
+          created_at: string
+          end_time: string
+          id: string
+          professional_id: string
+          start_time: string
+          updated_at: string
+          weekday: number
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          end_time?: string
+          id?: string
+          professional_id: string
+          start_time?: string
+          updated_at?: string
+          weekday: number
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          end_time?: string
+          id?: string
+          professional_id?: string
+          start_time?: string
+          updated_at?: string
+          weekday?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "availability_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       care_plans: {
         Row: {
           created_at: string
@@ -497,6 +538,7 @@ export type Database = {
           reviewed_at: string | null
           reviewed_by: string | null
           status: Database["public"]["Enums"]["request_status"]
+          type: Database["public"]["Enums"]["request_type"]
         }
         Insert: {
           created_at?: string
@@ -510,6 +552,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: Database["public"]["Enums"]["request_status"]
+          type?: Database["public"]["Enums"]["request_type"]
         }
         Update: {
           created_at?: string
@@ -523,6 +566,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: Database["public"]["Enums"]["request_status"]
+          type?: Database["public"]["Enums"]["request_type"]
         }
         Relationships: [
           {
@@ -635,6 +679,7 @@ export type Database = {
       visits: {
         Row: {
           address: string | null
+          cancellation_reason: string | null
           created_at: string
           created_by: string | null
           discipline: Database["public"]["Enums"]["discipline"]
@@ -649,6 +694,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          cancellation_reason?: string | null
           created_at?: string
           created_by?: string | null
           discipline: Database["public"]["Enums"]["discipline"]
@@ -663,6 +709,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          cancellation_reason?: string | null
           created_at?: string
           created_by?: string | null
           discipline?: Database["public"]["Enums"]["discipline"]
@@ -728,6 +775,7 @@ export type Database = {
       discipline: "kinesiologia" | "nutricion" | "enfermeria" | "aseo"
       incident_status: "open" | "in_review" | "resolved"
       request_status: "pending" | "approved" | "rejected"
+      request_type: "extra_visit" | "change" | "contact"
       verification_status: "pending" | "verified" | "rejected"
       visit_status:
         | "scheduled"
@@ -869,6 +917,7 @@ export const Constants = {
       discipline: ["kinesiologia", "nutricion", "enfermeria", "aseo"],
       incident_status: ["open", "in_review", "resolved"],
       request_status: ["pending", "approved", "rejected"],
+      request_type: ["extra_visit", "change", "contact"],
       verification_status: ["pending", "verified", "rejected"],
       visit_status: [
         "scheduled",

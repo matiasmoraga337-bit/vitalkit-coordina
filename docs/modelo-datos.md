@@ -14,7 +14,7 @@
 | `visits` | Visita programada: hogar, profesional, disciplina, fecha, estado y dirección. |
 | `care_plans` | Objetivos, frecuencia, recomendaciones y próxima revisión. |
 | `visit_reports` | Nota de la visita, resumen para la familia y fecha de cierre. |
-| `requests` | Solicitud de visita extra, cambio o contacto. |
+| `requests` | Solicitud de visita extra, cambio o contacto (`type`). |
 | `messages` | Mensajes entre familia y coordinación. |
 | `incidents` | Incidencia reportada por el profesional o la familia. |
 | `invoices` | Factura simulada del plan y las visitas extra. |

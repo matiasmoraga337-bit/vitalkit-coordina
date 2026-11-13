@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   AlertCircle,
   ArrowRight,
@@ -15,7 +16,7 @@ import { getCoordinatorDashboard } from "@/lib/data/coordinator";
 import { getInitials } from "@/lib/auth/roles";
 import { RequestStatusBadge, VisitStatusBadge } from "@/components/app/status-badge";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Card,
@@ -122,9 +123,9 @@ export default async function CoordinatorDashboardPage() {
                 <CardDescription>Operación</CardDescription>
                 <CardTitle className="text-xl">Próximas visitas</CardTitle>
               </div>
-              <Button variant="outline" size="sm" disabled>
+              <Link href="/calendario-coordinacion" className={cn(buttonVariants({ variant: "outline", size: "sm" }))}>
                 Ver calendario
-              </Button>
+              </Link>
             </CardHeader>
             <CardContent className="space-y-3">
               {data.visits.map((visit) => (
@@ -153,9 +154,13 @@ export default async function CoordinatorDashboardPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <VisitStatusBadge status={visit.status} />
-                    <Button size="sm" variant="ghost" disabled>
+                    <Link
+                      href={`/visitas/${visit.id}`}
+                      className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
+                      aria-label="Ver visita"
+                    >
                       <ArrowRight className="size-4" />
-                    </Button>
+                    </Link>
                   </div>
                 </div>
               ))}

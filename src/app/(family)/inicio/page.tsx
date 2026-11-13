@@ -16,7 +16,7 @@ import { getFamilyDashboard } from "@/lib/data/family";
 import { getInitials } from "@/lib/auth/roles";
 import { RequestStatusBadge, VisitStatusBadge } from "@/components/app/status-badge";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -208,22 +208,20 @@ export default async function FamilyHomePage() {
                 </div>
               </div>
               <div className="flex flex-wrap gap-2">
-                <Button disabled>
+                <Link href={`/visitas/${nextVisit.id}`} className={cn(buttonVariants())}>
                   Ver detalle
                   <ArrowRight className="size-4" />
-                </Button>
-                <Button variant="outline" disabled>
+                </Link>
+                <Link href="/solicitudes" className={cn(buttonVariants({ variant: "outline" }))}>
                   Pedir cambio
-                </Button>
-                <Button variant="ghost" disabled>
+                </Link>
+                <Link href="/mensajes" className={cn(buttonVariants({ variant: "ghost" }))}>
                   <MessageCircle className="size-4" />
                   Hablar con coordinación
-                </Button>
+                </Link>
               </div>
               <p className="text-xs text-muted-foreground">
-                La información viene de Supabase. La solicitud de visita extra
-                ya está habilitada; el resto de las acciones llegará en la
-                siguiente iteración.
+                La información y las acciones se guardan en Supabase.
               </p>
             </CardContent>
           </Card>
@@ -247,9 +245,12 @@ export default async function FamilyHomePage() {
                   <p className="rounded-xl bg-muted/50 p-3 text-sm leading-6 text-muted-foreground">
                     {lastReport.note}
                   </p>
-                  <Button variant="outline" className="w-full" disabled>
+                  <Link
+                    href={`/visitas/${lastReport.id}`}
+                    className={cn(buttonVariants({ variant: "outline" }), "w-full")}
+                  >
                     Ver reporte completo
-                  </Button>
+                  </Link>
                 </>
               ) : (
                 <p className="text-sm text-muted-foreground">
@@ -302,8 +303,8 @@ export default async function FamilyHomePage() {
                 <CardDescription>Coordinación</CardDescription>
                 <CardTitle className="text-xl">Solicitudes</CardTitle>
               </div>
-              <Link href="/demo" className="text-sm font-semibold text-primary hover:underline">
-                Ver demo
+              <Link href="/solicitudes" className="text-sm font-semibold text-primary hover:underline">
+                Ver todas
               </Link>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -336,9 +337,9 @@ export default async function FamilyHomePage() {
                         required
                         className="h-9 w-full rounded-lg border bg-background px-2.5 text-sm"
                       >
-                        <option value="kinesiologia">Kinesiolog?a</option>
-                        <option value="nutricion">Nutrici?n</option>
-                        <option value="enfermeria">Enfermer?a</option>
+                        <option value="kinesiologia">Kinesiología</option>
+                        <option value="nutricion">Nutrición</option>
+                        <option value="enfermeria">Enfermería</option>
                         <option value="aseo">Aseo</option>
                       </select>
                     </label>
@@ -357,7 +358,7 @@ export default async function FamilyHomePage() {
                       name="reason"
                       required
                       rows={3}
-                      placeholder="Cu?ntanos qu? necesita Elena."
+                      placeholder="Cuéntanos qué necesita Elena."
                     />
                   </label>
                   <button
@@ -369,12 +370,12 @@ export default async function FamilyHomePage() {
                 </form>
               </details>
               <div className="flex flex-wrap gap-2 pt-1">
-                <Button variant="outline" disabled>
+                <Link href="/factura" className={cn(buttonVariants({ variant: "outline" }))}>
                   <Receipt className="size-4" />
                   Ver factura
-                </Button>
-                <Link href="/demo" className={cn(buttonVariants({ variant: "ghost" }))}>
-                  Ir al modo demo
+                </Link>
+                <Link href="/mensajes" className={cn(buttonVariants({ variant: "ghost" }))}>
+                  Hablar con coordinación
                 </Link>
               </div>
             </CardContent>

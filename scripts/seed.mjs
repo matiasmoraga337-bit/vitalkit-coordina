@@ -136,6 +136,27 @@ async function resetDemoHousehold() {
 
 async function main() {
   const ids = await ensureUsers();
+
+  for (const professionalId of [
+    ids.kinesiologo,
+    ids.enfermera,
+    ids.nutricionista,
+    ids.aseo,
+  ]) {
+    const rows = [1, 2, 3, 4, 5].map((weekday) => ({
+      professional_id: professionalId,
+      weekday,
+      start_time: "09:00",
+      end_time: "18:00",
+      active: true,
+    }));
+
+    const { error: availabilityError } = await supabase
+      .from("availability")
+      .upsert(rows, { onConflict: "professional_id,weekday" });
+    if (availabilityError) throw availabilityError;
+  }
+
   await resetDemoHousehold();
 
   const { data: household, error: householdError } = await supabase

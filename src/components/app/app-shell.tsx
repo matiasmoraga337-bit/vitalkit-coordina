@@ -12,6 +12,7 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  MessageCircle,
   Receipt,
   UserCheck,
   Users,
@@ -57,10 +58,11 @@ const roleConfig: Record<
     home: "/inicio",
     nav: [
       { label: "Inicio", href: "/inicio", icon: Home },
-      { label: "Calendario", href: "/calendario", icon: CalendarDays, disabled: true },
-      { label: "Solicitudes", href: "/solicitudes", icon: Inbox, disabled: true },
-      { label: "Plan de cuidados", href: "/plan", icon: ClipboardList, disabled: true },
-      { label: "Factura", href: "/factura", icon: Receipt, disabled: true },
+      { label: "Calendario", href: "/calendario", icon: CalendarDays },
+      { label: "Solicitudes", href: "/solicitudes", icon: Inbox },
+      { label: "Plan de cuidados", href: "/plan", icon: ClipboardList },
+      { label: "Factura", href: "/factura", icon: Receipt },
+      { label: "Mensajes", href: "/mensajes", icon: MessageCircle },
     ],
   },
   coordinator: {
@@ -71,9 +73,11 @@ const roleConfig: Record<
     home: "/tablero",
     nav: [
       { label: "Tablero", href: "/tablero", icon: LayoutDashboard },
-      { label: "Casos", href: "/casos", icon: Users, disabled: true },
-      { label: "Solicitudes", href: "/solicitudes", icon: Inbox, disabled: true },
-      { label: "Profesionales", href: "/profesionales", icon: UserCheck, disabled: true },
+      { label: "Casos", href: "/casos", icon: Users },
+      { label: "Solicitudes", href: "/solicitudes-coordinacion", icon: Inbox },
+      { label: "Profesionales", href: "/profesionales", icon: UserCheck },
+      { label: "Calendario", href: "/calendario-coordinacion", icon: CalendarDays },
+      { label: "Mensajes", href: "/mensajes", icon: MessageCircle },
     ],
   },
   professional: {
@@ -84,8 +88,8 @@ const roleConfig: Record<
     home: "/agenda",
     nav: [
       { label: "Mi agenda", href: "/agenda", icon: CalendarDays },
-      { label: "Visitas", href: "/visitas", icon: ClipboardCheck, disabled: true },
-      { label: "Disponibilidad", href: "/disponibilidad", icon: Clock3, disabled: true },
+      { label: "Visitas", href: "/visitas", icon: ClipboardCheck },
+      { label: "Disponibilidad", href: "/disponibilidad", icon: Clock3 },
     ],
   },
 };

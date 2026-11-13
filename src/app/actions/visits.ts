@@ -8,6 +8,7 @@ import type { Database } from "@/lib/supabase/database.types";
 type Discipline = Database["public"]["Enums"]["discipline"];
 
 const disciplines = new Set(["kinesiologia", "nutricion", "enfermeria", "aseo"]);
+const requestTypes = new Set(["extra_visit", "change", "contact"]);
 
 function parseDiscipline(value: FormDataEntryValue | null): Discipline | null {
   const discipline = String(value ?? "");
@@ -20,6 +21,9 @@ export async function createRequest(formData: FormData) {
   const preferredDate = String(formData.get("preferred_date") ?? "").trim() || null;
   const preferredTime = String(formData.get("preferred_time") ?? "").trim() || null;
   const reason = String(formData.get("reason") ?? "").trim();
+  const requestedType = String(formData.get("type") ?? "extra_visit");
+  const type = requestTypes.has(requestedType) ? requestedType : "extra_visit";
+  const redirectTo = String(formData.get("redirect_to") ?? "/inicio");
 
   if (!discipline || !reason) {
     redirect("/inicio?error=Completa%20la%20disciplina%20y%20el%20motivo.");
@@ -43,6 +47,7 @@ export async function createRequest(formData: FormData) {
     preferred_date: preferredDate,
     preferred_time: preferredTime,
     reason,
+    type: type as Database["public"]["Enums"]["request_type"],
     status: "pending",
   });
 
@@ -52,7 +57,7 @@ export async function createRequest(formData: FormData) {
 
   revalidatePath("/inicio");
   revalidatePath("/tablero");
-  redirect("/inicio");
+  redirect(redirectTo.startsWith("/") ? redirectTo : "/inicio");
 }
 
 export async function approveRequest(formData: FormData) {
@@ -60,6 +65,7 @@ export async function approveRequest(formData: FormData) {
   const requestId = String(formData.get("request_id") ?? "");
   const professionalId = String(formData.get("professional_id") ?? "");
   const scheduledAtInput = String(formData.get("scheduled_at") ?? "");
+  const redirectTo = String(formData.get("redirect_to") ?? "/tablero");
 
   if (!requestId || !professionalId || !scheduledAtInput) {
     redirect("/tablero?error=Selecciona%20profesional%20y%20horario.");
@@ -125,7 +131,7 @@ export async function approveRequest(formData: FormData) {
   revalidatePath("/tablero");
   revalidatePath("/inicio");
   revalidatePath("/agenda");
-  redirect("/tablero");
+  redirect(redirectTo.startsWith("/") ? redirectTo : "/tablero");
 }
 
 export async function startVisit(formData: FormData) {
@@ -182,4 +188,70 @@ export async function completeVisit(formData: FormData) {
   revalidatePath("/inicio");
   revalidatePath("/tablero");
   redirect("/agenda");
+}
+
+export async function reassignVisit(formData: FormData) {
+  const { supabase } = await requireRole("coordinator");
+  const visitId = String(formData.get("visit_id") ?? "");
+  const professionalId = String(formData.get("professional_id") ?? "");
+  const scheduledAtInput = String(formData.get("scheduled_at") ?? "");
+
+  if (!visitId || !professionalId) {
+    redirect("/tablero?error=Selecciona%20un%20profesional.");
+  }
+
+  const update: {
+    professional_id: string;
+    status: "confirmed";
+    scheduled_at?: string;
+  } = {
+    professional_id: professionalId,
+    status: "confirmed",
+  };
+
+  if (scheduledAtInput) {
+    const scheduledAt = new Date(scheduledAtInput);
+    if (Number.isNaN(scheduledAt.getTime())) {
+      redirect(`/visitas/${visitId}?error=Horario%20inv%C3%A1lido.`);
+    }
+    update.scheduled_at = scheduledAt.toISOString();
+  }
+
+  const { error } = await supabase.from("visits").update(update).eq("id", visitId);
+
+  if (error) {
+    redirect(`/visitas/${visitId}?error=${encodeURIComponent(error.message)}`);
+  }
+
+  revalidatePath("/tablero");
+  revalidatePath("/inicio");
+  revalidatePath("/agenda");
+  revalidatePath(`/visitas/${visitId}`);
+  redirect(`/visitas/${visitId}?ok=Visita%20reasignada.`);
+}
+
+export async function cancelVisit(formData: FormData) {
+  const { supabase } = await requireRole("coordinator");
+  const visitId = String(formData.get("visit_id") ?? "");
+  const reason = String(formData.get("cancellation_reason") ?? "").trim();
+
+  if (!visitId) redirect("/tablero");
+
+  const { error } = await supabase
+    .from("visits")
+    .update({
+      status: "cancelled",
+      cancellation_reason: reason || "Cancelada por coordinaci?n.",
+    })
+    .eq("id", visitId);
+
+  if (error) {
+    redirect(`/visitas/${visitId}?error=${encodeURIComponent(error.message)}`);
+  }
+
+  revalidatePath("/tablero");
+  revalidatePath("/inicio");
+  revalidatePath("/agenda");
+  revalidatePath(`/visitas/${visitId}`);
+  redirect(`/visitas/${visitId}?ok=Visita%20cancelada.`);
 }

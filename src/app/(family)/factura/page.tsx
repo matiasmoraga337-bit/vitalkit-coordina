@@ -1,0 +1,96 @@
+import { Receipt, Wallet } from "lucide-react";
+import { AppShell } from "@/components/app/app-shell";
+import { EmptyState } from "@/components/app/empty-state";
+import { PageHeader } from "@/components/app/page-header";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { requireRole } from "@/lib/auth";
+import { getInitials } from "@/lib/auth/roles";
+import { getFamilyInvoices } from "@/lib/data/family";
+import { formatCLP } from "@/lib/format";
+
+export const instant = false;
+
+const statusLabel: Record<string, string> = {
+  pending: "Pendiente",
+  paid: "Pagada",
+  overdue: "Vencida",
+};
+
+export default async function FamilyInvoicePage() {
+  const { supabase, profile } = await requireRole("family");
+  const invoices = await getFamilyInvoices(supabase, profile.id);
+
+  return (
+    <AppShell
+      role="family"
+      user={{
+        name: profile.full_name,
+        detail: "Facturación",
+        initials: getInitials(profile.full_name),
+      }}
+    >
+      <div className="space-y-6">
+        <PageHeader
+          eyebrow="Facturación"
+          title="Tus facturas"
+          description="Un solo cobro mensual por el plan y las visitas extra."
+          backHref="/inicio"
+        />
+
+        {invoices.length === 0 ? (
+          <EmptyState icon={Receipt} title="Sin facturas" description="Cuando se emita el primer cobro aparecerá aquí." />
+        ) : (
+          <div className="grid gap-4">
+            {invoices.map((invoice) => (
+              <Card key={invoice.id}>
+                <CardHeader className="flex-row items-start justify-between gap-4">
+                  <div>
+                    <CardDescription>Período {invoice.period}</CardDescription>
+                    <CardTitle className="text-xl">Factura mensual</CardTitle>
+                  </div>
+                  <Badge variant="outline" className="rounded-full">
+                    {statusLabel[invoice.status] ?? invoice.status}
+                  </Badge>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    <div className="rounded-xl bg-muted/50 p-3">
+                      <p className="text-xs text-muted-foreground">Plan</p>
+                      <p className="mt-1 font-semibold">{formatCLP(invoice.planAmount)}</p>
+                    </div>
+                    <div className="rounded-xl bg-muted/50 p-3">
+                      <p className="text-xs text-muted-foreground">Visitas extra</p>
+                      <p className="mt-1 font-semibold">{formatCLP(invoice.extrasAmount)}</p>
+                    </div>
+                    <div className="rounded-xl bg-muted/50 p-3">
+                      <p className="text-xs text-muted-foreground">Total</p>
+                      <p className="mt-1 font-heading text-xl font-bold">{formatCLP(invoice.total)}</p>
+                    </div>
+                  </div>
+                  <Separator />
+                  <div className="flex flex-col gap-2 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+                    <p>Emitida: {invoice.issuedAt}</p>
+                    <p>Vencimiento: {invoice.dueAt ?? "Sin fecha"}</p>
+                  </div>
+                  <Button variant="outline" className="w-full" disabled>
+                    <Wallet className="size-4" />
+                    Pago en línea disponible en la siguiente etapa
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+    </AppShell>
+  );
+}

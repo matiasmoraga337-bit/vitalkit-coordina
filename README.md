@@ -1,20 +1,27 @@
 # VitalKit Coordina
 
-PWA de coordinación de cuidado domiciliario para familias de Puerto Montt. Conecta a la familia, la coordinación y los profesionales en un solo flujo: plan, agenda, visitas y reportes.
+PWA de coordinación de cuidado domiciliario para familias de Puerto Montt. Conecta a la familia, la coordinación y los profesionales en un solo flujo: plan, agenda, visitas, mensajes y reportes.
 
 > MVP académico del Hito 3. Datos de demostración, sin pacientes reales.
+
+**Demo en vivo:** https://vitalkit-coordina.vercel.app
 
 ## Estado
 
 - [x] Repositorio y scaffold Next.js
-- [x] Sistema visual y vistas demo de los tres roles
-- [x] Documentación de alcance, datos, demo y arquitectura
+- [x] Sistema visual y vistas de los tres roles
 - [x] Supabase: schema, RLS y seed
-- [ ] Autenticación y selector de rol real
-- [ ] Solicitud → asignación → check-in → reporte persistente
-- [x] PWA: manifest y service worker básico
+- [x] Autenticación y selector de rol real
+- [x] Loop: solicitud → asignación → check-in → reporte
+- [x] Calendario, plan de cuidados y factura simulada
+- [x] Casos, profesionales, reasignación y cancelación
+- [x] Incidencias y verificación de profesionales
+- [x] Chat familia ↔ coordinación
+- [x] Disponibilidad profesional editable
+- [x] PWA: manifest y service worker
 - [x] Deploy en Vercel
-- [ ] Validación con 5 personas
+- [ ] Validación con 5 personas (fuera del alcance actual)
+- [ ] Informe y presentación (fuera del alcance actual)
 
 ## Stack
 
@@ -34,7 +41,7 @@ npm run seed
 npm run dev
 ```
 
-Abrir [http://localhost:3000](http://localhost:3000) y usar los botones demo de `/demo` o `/login`. No necesitas escribir contrase?a para la demo.
+Abrir [http://localhost:3000](http://localhost:3000) y usar los botones demo de `/demo` o `/login`. No necesitas escribir contraseña para la demo.
 
 ## Scripts
 
@@ -49,7 +56,7 @@ npm run seed       # crea usuarios y datos demo en Supabase
 
 ## Supabase
 
-- Proyecto: `vitalkit-coordina` (S?o Paulo).
+- Proyecto: `vitalkit-coordina` (São Paulo).
 - Migraciones en `supabase/migrations/`.
 - Seed demo en `scripts/seed.mjs`.
 - RLS activo en todas las tablas.
@@ -57,36 +64,58 @@ npm run seed       # crea usuarios y datos demo en Supabase
 
 ## Rutas
 
-| Ruta | Rol | Estado |
+| Ruta | Rol | Descripción |
 |---|---|---|
-| `/` | Entrada | Lista |
-| `/demo` | Selector de rol | Lista |
-| `/inicio` | Familia | Demo estática |
-| `/tablero` | Coordinación | Demo estática |
-| `/agenda` | Profesional | Demo estática |
+| `/` | Público | Entrada |
+| `/demo` | Público | Selector de rol demo |
+| `/login` | Público | Login y cuentas demo |
+| `/inicio` | Familia | Inicio, próxima visita y resumen |
+| `/calendario` | Familia | Próximas visitas e historial |
+| `/visitas/[id]` | Familia / profesional / coordinación | Detalle compartido de visita |
+| `/solicitudes` | Familia | Visita extra, cambio y contacto |
+| `/plan` | Familia | Plan de cuidados |
+| `/factura` | Familia | Factura simulada |
+| `/mensajes` | Familia / coordinación | Chat |
+| `/mensajes/[householdId]` | Familia / coordinación | Hilo por hogar |
+| `/tablero` | Coordinación | Tablero del día |
+| `/casos` | Coordinación | Hogares del piloto |
+| `/casos/[id]` | Coordinación | Caso completo |
+| `/solicitudes-coordinacion` | Coordinación | Bandeja de solicitudes |
+| `/profesionales` | Coordinación | Equipo, verificación y disponibilidad |
+| `/calendario-coordinacion` | Coordinación | Agenda global |
+| `/agenda` | Profesional | Agenda personal |
+| `/visitas` | Profesional | Historial de visitas |
+| `/disponibilidad` | Profesional | Disponibilidad semanal |
 
 ## Estructura
 
 ```text
 src/
   app/
-    (family)/inicio/
-    (coordinator)/tablero/
-    (professional)/agenda/
-    demo/
+    (family)/
+    (coordinator)/
+    (professional)/
+    (auth)/
+    actions/
+    visitas/[id]/
+    mensajes/
   components/
     app/
     brand/
     ui/
   lib/
+    auth/
+    data/
+    supabase/
 docs/
+supabase/
 ```
 
 ## Roles
 
-- **Familia:** plan, próxima visita, reporte, plan de cuidados y solicitudes.
-- **Coordinación:** tablero del día, solicitudes, asignación y profesionales.
-- **Profesional:** agenda, visita, check-in/out y nota.
+- **Familia:** plan, próxima visita, calendario, reportes, solicitudes, factura y chat.
+- **Coordinación:** tablero, casos, solicitudes, profesionales, calendario y chat.
+- **Profesional:** agenda, historial, detalle de visita, incidencias y disponibilidad.
 
 ## Documentación
 
@@ -97,22 +126,10 @@ docs/
 - [Recursos gratuitos](docs/recursos.md)
 - [Deploy en Vercel](docs/deploy.md)
 
-## Entregables H2
-
-El informe, la presentación y el prototipo de landing del Hito 2 se mantienen fuera de este repositorio para no mezclar la app con los entregables académicos. Enlace público pendiente.
-
 ## Seguridad
 
 - No se commitean `.env.local`, tokens ni claves de servicio.
-- La `SUPABASE_SERVICE_ROLE_KEY` solo se usa en scripts locales de seed.
+- La `SERVICE_ROLE_KEY` solo se usa en scripts locales de seed.
 - La demo usa datos ficticios.
-- RLS se activa en todas las tablas cuando se conecte Supabase.
+- RLS activo en todas las tablas.
 - No se almacenan datos clínicos sensibles.
-
-## Próximo hito
-
-1. Crear el proyecto Supabase y aplicar migraciones.
-2. Conectar autenticación y las tres cuentas demo.
-3. Persistir solicitudes, asignaciones, visitas y reportes.
-4. Agregar PWA y deploy.
-5. Validar el flujo con cinco personas.

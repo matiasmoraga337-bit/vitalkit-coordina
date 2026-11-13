@@ -30,6 +30,7 @@ export type FamilyVisit = {
 
 export type FamilyRequest = {
   id: string;
+  type: string;
   discipline: Discipline;
   requestedBy: string;
   date: string;
@@ -194,6 +195,7 @@ export async function getFamilyDashboard(
 
   const mappedRequests: FamilyRequest[] = requests.map((request) => ({
     id: request.id,
+    type: request.type,
     discipline: request.discipline as Discipline,
     requestedBy: contactName,
     date: formatRelativeDate(request.created_at),
@@ -252,4 +254,46 @@ export async function getFamilyDashboard(
       planVisits,
     },
   };
+}
+
+export type FamilyInvoice = {
+  id: string;
+  period: string;
+  planAmount: number;
+  extrasAmount: number;
+  total: number;
+  status: string;
+  issuedAt: string;
+  dueAt: string | null;
+};
+
+export async function getFamilyInvoices(
+  supabase: Client,
+  profileId: string,
+): Promise<FamilyInvoice[]> {
+  const { data: membership } = await supabase
+    .from("household_members")
+    .select("household_id")
+    .eq("profile_id", profileId)
+    .limit(1)
+    .maybeSingle();
+
+  if (!membership) return [];
+
+  const { data } = await supabase
+    .from("invoices")
+    .select("*")
+    .eq("household_id", membership.household_id)
+    .order("issued_at", { ascending: false });
+
+  return (data ?? []).map((invoice) => ({
+    id: invoice.id,
+    period: invoice.period,
+    planAmount: invoice.plan_amount_clp,
+    extrasAmount: invoice.extras_amount_clp,
+    total: invoice.total_clp,
+    status: invoice.status,
+    issuedAt: invoice.issued_at,
+    dueAt: invoice.due_at,
+  }));
 }

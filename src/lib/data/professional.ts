@@ -111,3 +111,28 @@ export async function getProfessionalAgenda(
     currentVisit,
   };
 }
+
+export type ProfessionalAvailabilityBlock = {
+  weekday: number;
+  startTime: string;
+  endTime: string;
+  active: boolean;
+};
+
+export async function getProfessionalAvailability(
+  supabase: Client,
+  professionalId: string,
+): Promise<ProfessionalAvailabilityBlock[]> {
+  const { data } = await supabase
+    .from("availability")
+    .select("*")
+    .eq("professional_id", professionalId)
+    .order("weekday", { ascending: true });
+
+  return (data ?? []).map((block) => ({
+    weekday: block.weekday,
+    startTime: block.start_time,
+    endTime: block.end_time,
+    active: block.active,
+  }));
+}
