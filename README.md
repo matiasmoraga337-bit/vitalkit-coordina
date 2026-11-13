@@ -13,7 +13,7 @@ PWA de coordinación de cuidado domiciliario para familias de Puerto Montt. Cone
 - [ ] Autenticación y selector de rol real
 - [ ] Solicitud → asignación → check-in → reporte persistente
 - [x] PWA: manifest y service worker básico
-- [ ] Deploy en Vercel
+- [x] Deploy en Vercel
 - [ ] Validación con 5 personas
 
 ## Stack
