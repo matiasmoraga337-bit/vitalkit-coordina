@@ -49,7 +49,16 @@ La visita pasa a `completed` y se crea el reporte.
 Carolina vuelve a `/inicio`.
 
 - Ve el nuevo reporte.
-- Califica la visita.
+- Entra a `/mensajes` y responde a coordinaci?n.
+- Puede revisar `/calendario`, `/plan` y `/factura`.
+
+### 6. Disponibilidad (opcional, 20 s)
+
+Diego entra a `/disponibilidad`.
+
+- Activa o desactiva un d?a.
+- Cambia el horario y guarda.
+- Valentina lo ve en `/profesionales`.
 
 ## Mensaje de cierre
 
