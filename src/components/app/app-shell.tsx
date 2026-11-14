@@ -208,6 +208,12 @@ export function AppShell({
 }) {
   return (
     <div className="min-h-dvh bg-background">
+      <a
+        href="#app-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground"
+      >
+        Saltar al contenido
+      </a>
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 border-r bg-card lg:block">
         <SidebarContent role={role} user={user} />
       </aside>
@@ -237,7 +243,7 @@ export function AppShell({
           <ThemeToggle />
         </header>
 
-        <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+        <main id="app-content" className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
           {children}
         </main>
       </div>
