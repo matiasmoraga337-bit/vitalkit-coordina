@@ -63,7 +63,9 @@ npm run seed       # crea usuarios y datos demo en Supabase
 - `AppShell` persistente por layout; ya no se remonta en cada navegaci?n.
 - Skeletons con `loading.tsx` y botones con estado pendiente.
 - Chat y disponibilidad con actualizaci?n optimista.
-- Mediciones locales: navegaci?n entre vistas ~90 ms, mensaje visible ~80 ms, cambio de disponibilidad ~40 ms.
+- Contenido de p?ginas cacheado por sesi?n con `use cache: private` y prefetch priorizado.
+- Dashboard familiar reducido a 3 consultas con selects anidados.
+- Mediciones: contenido de nueva pantalla ~40?100 ms tras el prefetch; mensaje visible ~80 ms; cambio de disponibilidad ~40 ms.
 
 ## Supabase
 
