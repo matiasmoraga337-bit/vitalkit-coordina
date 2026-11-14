@@ -1,5 +1,13 @@
 # Guion de demo
 
+## Recorrido de landing
+
+1. Abrir `/`.
+2. Mostrar hero, disciplinas, cómo funciona y cobertura.
+3. Probar el simulador y elegir un plan.
+4. Enviar el formulario de evaluación.
+5. Entrar como coordinación y mostrar el lead en `/leads`.
+
 ## Preparación
 
 - Abrir la app en un teléfono o en una ventana angosta.
