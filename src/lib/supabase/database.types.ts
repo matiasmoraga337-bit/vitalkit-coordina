@@ -492,6 +492,90 @@ export type Database = {
           },
         ]
       }
+      payments: {
+        Row: {
+          amount_clp: number
+          authorization_code: string | null
+          card_last4: string | null
+          created_at: string
+          created_by: string | null
+          household_id: string | null
+          id: string
+          invoice_id: string | null
+          lead_id: string | null
+          method: string
+          paid_at: string | null
+          plan_id: string | null
+          status: string
+        }
+        Insert: {
+          amount_clp: number
+          authorization_code?: string | null
+          card_last4?: string | null
+          created_at?: string
+          created_by?: string | null
+          household_id?: string | null
+          id?: string
+          invoice_id?: string | null
+          lead_id?: string | null
+          method?: string
+          paid_at?: string | null
+          plan_id?: string | null
+          status: string
+        }
+        Update: {
+          amount_clp?: number
+          authorization_code?: string | null
+          card_last4?: string | null
+          created_at?: string
+          created_by?: string | null
+          household_id?: string | null
+          id?: string
+          invoice_id?: string | null
+          lead_id?: string | null
+          method?: string
+          paid_at?: string | null
+          plan_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       plans: {
         Row: {
           active: boolean
@@ -835,6 +919,10 @@ export type Database = {
       }
       is_my_coordinator: { Args: { target_profile: string }; Returns: boolean }
       is_my_professional: { Args: { target_profile: string }; Returns: boolean }
+      pay_invoice: {
+        Args: { p_card_last4: string; p_invoice_id: string }
+        Returns: Json
+      }
     }
     Enums: {
       app_role: "family" | "coordinator" | "professional" | "admin"

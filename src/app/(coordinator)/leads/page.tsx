@@ -1,4 +1,4 @@
-import { Mail, Phone, UserPlus } from "lucide-react";
+import { CreditCard, Mail, Phone, UserPlus } from "lucide-react";
 import { cacheLife, cacheTag } from "next/cache";
 import { EmptyState } from "@/components/app/empty-state";
 import { PageHeader } from "@/components/app/page-header";
@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { requireRole } from "@/lib/auth";
 import { getLeadsCached } from "@/lib/data/leads";
 import { updateLeadStatus } from "@/app/actions/leads";
-import { formatRelativeDate } from "@/lib/format";
+import { formatCLP, formatRelativeDate } from "@/lib/format";
 import { planById, type PlanId } from "@/lib/plans";
 import { cn } from "@/lib/utils";
 
@@ -90,7 +90,19 @@ export default async function LeadsPage() {
                     {needs.map((need) => (
                       <Badge key={need} variant="outline" className="rounded-full">{need}</Badge>
                     ))}
+                    {lead.paymentStatus === "approved" && (
+                      <Badge className="rounded-full bg-emerald-100 text-emerald-800 hover:bg-emerald-100">
+                        <CreditCard className="size-3" />
+                        Pago simulado
+                      </Badge>
+                    )}
                   </div>
+                  {lead.paymentStatus === "approved" && (
+                    <p className="text-xs text-muted-foreground">
+                      Autorización {lead.paymentReference ?? "SIM-DEMO"}
+                      {lead.paymentAmount ? ` ? ${formatCLP(lead.paymentAmount)}` : ""}
+                    </p>
+                  )}
                   {lead.message && (
                     <p className="rounded-xl bg-muted/50 p-3 text-sm leading-6">{lead.message}</p>
                   )}

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -15,18 +16,12 @@ export function PlanCta({
   label?: string;
 }) {
   return (
-    <button
-      type="button"
-      onClick={() => {
-        window.dispatchEvent(
-          new CustomEvent("vitalkit:select-plan", { detail: planId }),
-        );
-        document.getElementById("evaluacion")?.scrollIntoView({ behavior: "smooth" });
-      }}
+    <Link
+      href={`/checkout?plan=${planId}`}
       className={cn(buttonVariants({ variant }), "w-full")}
     >
       {label}
       <ArrowRight className="size-4" />
-    </button>
+    </Link>
   );
 }

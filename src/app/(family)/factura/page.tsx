@@ -3,6 +3,7 @@ import { MessageCircle, Receipt } from "lucide-react";
 import { cacheLife, cacheTag } from "next/cache";
 import { EmptyState } from "@/components/app/empty-state";
 import { PageHeader } from "@/components/app/page-header";
+import { InvoicePaymentButton } from "@/components/family/invoice-payment-button";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -79,7 +80,12 @@ export default async function FamilyInvoicePage() {
                     <p>Emitida: {invoice.issuedAt}</p>
                     <p>Vencimiento: {invoice.dueAt ?? "Sin fecha"}</p>
                   </div>
-                  <div className="flex flex-col gap-2">
+                  <div className="space-y-2">
+                    <InvoicePaymentButton
+                      invoiceId={invoice.id}
+                      amount={invoice.total}
+                      period={invoice.period}
+                    />
                     <Link
                       href="/mensajes"
                       className={cn(buttonVariants({ variant: "outline" }), "w-full")}
@@ -88,7 +94,7 @@ export default async function FamilyInvoicePage() {
                       ¿Dudas con tu factura? Hablar con coordinación
                     </Link>
                     <p className="text-center text-xs text-muted-foreground">
-                      El pago en línea se habilitará en la siguiente etapa.
+                      Pago simulado de demostración. No se realiza ningún cobro real.
                     </p>
                   </div>
                 </CardContent>
