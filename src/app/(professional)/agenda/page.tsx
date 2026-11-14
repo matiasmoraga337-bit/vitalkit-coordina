@@ -4,17 +4,13 @@ import {
   Clock3,
   MapPin,
   Navigation,
-  NotebookPen,
-  PlayCircle,
 } from "lucide-react";
 import { requireRole } from "@/lib/auth";
-import { completeVisit, startVisit } from "@/app/actions/visits";
+import { ProfessionalVisitActions } from "@/components/app/professional-visit-actions";
 import { getProfessionalAgenda } from "@/lib/data/professional";
 import { VisitStatusBadge } from "@/components/app/status-badge";
-import { SubmitButton } from "@/components/app/submit-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Card,
   CardContent,
@@ -165,45 +161,10 @@ export default async function ProfessionalAgendaPage() {
               </div>
               {data.currentVisit ? (
                 <div className="space-y-2">
-                  {currentVisit.status !== "in_progress" && (
-                    <form action={startVisit}>
-                      <input
-                        type="hidden"
-                        name="visit_id"
-                        value={data.currentVisit.id}
-                      />
-                      <SubmitButton className="w-full" pendingText="Registrando...">
-                        <PlayCircle className="size-4" />
-                        Hacer check-in
-                      </SubmitButton>
-                    </form>
-                  )}
-                  <details className="rounded-xl border p-3">
-                    <summary className="cursor-pointer text-sm font-semibold text-primary">
-                      Escribir nota de visita
-                    </summary>
-                    <form action={completeVisit} className="mt-3 space-y-2">
-                      <input
-                        type="hidden"
-                        name="visit_id"
-                        value={data.currentVisit.id}
-                      />
-                      <Textarea
-                        name="summary"
-                        required
-                        rows={3}
-                        placeholder="Resumen de la visita, avances y recomendaciones."
-                      />
-                      <SubmitButton
-                        size="sm"
-                        className="w-full"
-                        pendingText="Guardando..."
-                      >
-                        <NotebookPen className="size-4" />
-                        Guardar y completar
-                      </SubmitButton>
-                    </form>
-                  </details>
+                  <ProfessionalVisitActions
+                    visitId={data.currentVisit.id}
+                    initialStatus={currentVisit.status}
+                  />
                   <Button variant="ghost" className="w-full" disabled>
                     <Navigation className="size-4" />
                     Ver ruta

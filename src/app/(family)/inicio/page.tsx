@@ -10,10 +10,9 @@ import {
   UserRound,
 } from "lucide-react";
 import { requireRole } from "@/lib/auth";
-import { createRequest } from "@/app/actions/visits";
 import { getFamilyDashboard } from "@/lib/data/family";
-import { RequestStatusBadge, VisitStatusBadge } from "@/components/app/status-badge";
-import { SubmitButton } from "@/components/app/submit-button";
+import { VisitStatusBadge } from "@/components/app/status-badge";
+import { FamilyRequestsPanel } from "@/components/app/family-requests-panel";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -24,8 +23,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { disciplineMeta } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
@@ -286,64 +283,7 @@ export default async function FamilyHomePage() {
               </Link>
             </CardHeader>
             <CardContent className="space-y-3">
-              {requests.map((request) => (
-                <div
-                  key={request.id}
-                  className="flex flex-col gap-2 rounded-xl border p-3 sm:flex-row sm:items-center sm:justify-between"
-                >
-                  <div>
-                    <p className="text-sm font-semibold">
-                      {disciplineMeta[request.discipline].label}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {request.date} · {request.reason}
-                    </p>
-                  </div>
-                  <RequestStatusBadge status={request.status} />
-                </div>
-              ))}
-              <details className="rounded-xl border p-3">
-                <summary className="cursor-pointer text-sm font-semibold text-primary">
-                  Pedir visita extra
-                </summary>
-                <form action={createRequest} className="mt-3 space-y-2">
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    <label className="space-y-1 text-xs font-medium">
-                      Disciplina
-                      <select
-                        name="discipline"
-                        required
-                        className="h-9 w-full rounded-lg border bg-background px-2.5 text-sm"
-                      >
-                        <option value="kinesiologia">Kinesiología</option>
-                        <option value="nutricion">Nutrición</option>
-                        <option value="enfermeria">Enfermería</option>
-                        <option value="aseo">Aseo</option>
-                      </select>
-                    </label>
-                    <label className="space-y-1 text-xs font-medium">
-                      Fecha preferida
-                      <Input name="preferred_date" type="date" />
-                    </label>
-                  </div>
-                  <label className="space-y-1 text-xs font-medium">
-                    Hora preferida
-                    <Input name="preferred_time" type="time" />
-                  </label>
-                  <label className="space-y-1 text-xs font-medium">
-                    Motivo
-                    <Textarea
-                      name="reason"
-                      required
-                      rows={3}
-                      placeholder="Cuéntanos qué necesita Elena."
-                    />
-                  </label>
-                  <SubmitButton size="sm" className="w-full" pendingText="Enviando...">
-                    Enviar solicitud
-                  </SubmitButton>
-                </form>
-              </details>
+              <FamilyRequestsPanel initialRequests={requests} />
               <div className="flex flex-wrap gap-2 pt-1">
                 <Link href="/factura" className={cn(buttonVariants({ variant: "outline" }))}>
                   <Receipt className="size-4" />

@@ -10,13 +10,11 @@ import {
   Users,
 } from "lucide-react";
 import { requireRole } from "@/lib/auth";
-import { approveRequest } from "@/app/actions/visits";
 import { getCoordinatorDashboard } from "@/lib/data/coordinator";
-import { RequestStatusBadge, VisitStatusBadge } from "@/components/app/status-badge";
-import { SubmitButton } from "@/components/app/submit-button";
+import { VisitStatusBadge } from "@/components/app/status-badge";
+import { CoordinatorPendingRequests } from "@/components/app/coordinator-pending-requests";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
@@ -171,57 +169,10 @@ export default async function CoordinatorDashboardPage() {
                 <CardTitle className="text-xl">Solicitudes</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                {pendingRequests.map((request) => (
-                  <div key={request.id} className="rounded-xl border p-3">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="text-sm font-semibold">
-                        {disciplineMeta[request.discipline].label}
-                      </p>
-                      <RequestStatusBadge status={request.status} />
-                    </div>
-                    <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                      {request.requestedBy} · {request.date}
-                    </p>
-                    <p className="mt-2 text-sm leading-6">{request.reason}</p>
-                    <form action={approveRequest} className="mt-3 space-y-2">
-                      <input type="hidden" name="request_id" value={request.id} />
-                      <select
-                        name="professional_id"
-                        required
-                        className="h-9 w-full rounded-lg border bg-background px-2.5 text-sm"
-                      >
-                        <option value="">Selecciona profesional</option>
-                        {data.professionals
-                          .filter(
-                            (professional) =>
-                              professional.discipline === request.discipline,
-                          )
-                          .map((professional) => (
-                            <option key={professional.id} value={professional.id}>
-                              {professional.name}
-                            </option>
-                          ))}
-                      </select>
-                      <Input
-                        name="scheduled_at"
-                        type="datetime-local"
-                        required
-                      />
-                      <SubmitButton
-                        size="sm"
-                        className="w-full"
-                        pendingText="Asignando..."
-                      >
-                        Aprobar y asignar
-                      </SubmitButton>
-                    </form>
-                  </div>
-                ))}
-                {pendingRequests.length === 0 && (
-                  <p className="text-sm text-muted-foreground">
-                    Sin solicitudes pendientes.
-                  </p>
-                )}
+                <CoordinatorPendingRequests
+                  initialRequests={pendingRequests}
+                  professionals={data.professionals}
+                />
               </CardContent>
             </Card>
 

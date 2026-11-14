@@ -23,10 +23,9 @@ export async function createRequest(formData: FormData) {
   const reason = String(formData.get("reason") ?? "").trim();
   const requestedType = String(formData.get("type") ?? "extra_visit");
   const type = requestTypes.has(requestedType) ? requestedType : "extra_visit";
-  const redirectTo = String(formData.get("redirect_to") ?? "/inicio");
 
   if (!discipline || !reason) {
-    redirect("/inicio?error=Completa%20la%20disciplina%20y%20el%20motivo.");
+    return { ok: false, error: "Completa la disciplina y el motivo." };
   }
 
   const { data: membership } = await supabase
@@ -37,7 +36,7 @@ export async function createRequest(formData: FormData) {
     .maybeSingle();
 
   if (!membership) {
-    redirect("/inicio?error=No%20tienes%20un%20hogar%20asignado.");
+    return { ok: false, error: "No tienes un hogar asignado." };
   }
 
   const { error } = await supabase.from("requests").insert({
@@ -52,12 +51,12 @@ export async function createRequest(formData: FormData) {
   });
 
   if (error) {
-    redirect(`/inicio?error=${encodeURIComponent(error.message)}`);
+    return { ok: false, error: error.message };
   }
 
   revalidatePath("/inicio");
   revalidatePath("/tablero");
-  redirect(redirectTo.startsWith("/") ? redirectTo : "/inicio");
+  return { ok: true };
 }
 
 export async function approveRequest(formData: FormData) {
@@ -65,15 +64,14 @@ export async function approveRequest(formData: FormData) {
   const requestId = String(formData.get("request_id") ?? "");
   const professionalId = String(formData.get("professional_id") ?? "");
   const scheduledAtInput = String(formData.get("scheduled_at") ?? "");
-  const redirectTo = String(formData.get("redirect_to") ?? "/tablero");
 
   if (!requestId || !professionalId || !scheduledAtInput) {
-    redirect("/tablero?error=Selecciona%20profesional%20y%20horario.");
+    return { ok: false, error: "Selecciona profesional y horario." };
   }
 
   const scheduledAt = new Date(scheduledAtInput);
   if (Number.isNaN(scheduledAt.getTime())) {
-    redirect("/tablero?error=Horario%20inv%C3%A1lido.");
+    return { ok: false, error: "Horario inv?lido." };
   }
 
   const { data: request, error: requestError } = await supabase
@@ -83,7 +81,7 @@ export async function approveRequest(formData: FormData) {
     .single();
 
   if (requestError || !request) {
-    redirect("/tablero?error=Solicitud%20no%20encontrada.");
+    return { ok: false, error: "Solicitud no encontrada." };
   }
 
   const { data: elder } = await supabase
@@ -112,7 +110,7 @@ export async function approveRequest(formData: FormData) {
   });
 
   if (visitError) {
-    redirect(`/tablero?error=${encodeURIComponent(visitError.message)}`);
+    return { ok: false, error: visitError.message };
   }
 
   const { error: updateError } = await supabase
@@ -125,20 +123,20 @@ export async function approveRequest(formData: FormData) {
     .eq("id", requestId);
 
   if (updateError) {
-    redirect(`/tablero?error=${encodeURIComponent(updateError.message)}`);
+    return { ok: false, error: updateError.message };
   }
 
   revalidatePath("/tablero");
   revalidatePath("/inicio");
   revalidatePath("/agenda");
-  redirect(redirectTo.startsWith("/") ? redirectTo : "/tablero");
+  return { ok: true };
 }
 
 export async function startVisit(formData: FormData) {
   const { supabase, user } = await requireRole("professional");
   const visitId = String(formData.get("visit_id") ?? "");
 
-  if (!visitId) redirect("/agenda");
+  if (!visitId) return { ok: false, error: "Visita no encontrada." };
 
   const { error } = await supabase
     .from("visits")
@@ -147,12 +145,12 @@ export async function startVisit(formData: FormData) {
     .eq("professional_id", user.id);
 
   if (error) {
-    redirect(`/agenda?error=${encodeURIComponent(error.message)}`);
+    return { ok: false, error: error.message };
   }
 
   revalidatePath("/agenda");
   revalidatePath("/inicio");
-  redirect("/agenda");
+  return { ok: true };
 }
 
 export async function completeVisit(formData: FormData) {
@@ -161,7 +159,7 @@ export async function completeVisit(formData: FormData) {
   const summary = String(formData.get("summary") ?? "").trim();
 
   if (!visitId || !summary) {
-    redirect("/agenda?error=Escribe%20la%20nota%20de%20la%20visita.");
+    return { ok: false, error: "Escribe la nota de la visita." };
   }
 
   const { error: reportError } = await supabase.from("visit_reports").insert({
@@ -171,7 +169,7 @@ export async function completeVisit(formData: FormData) {
   });
 
   if (reportError) {
-    redirect(`/agenda?error=${encodeURIComponent(reportError.message)}`);
+    return { ok: false, error: reportError.message };
   }
 
   const { error: visitError } = await supabase
@@ -181,13 +179,13 @@ export async function completeVisit(formData: FormData) {
     .eq("professional_id", user.id);
 
   if (visitError) {
-    redirect(`/agenda?error=${encodeURIComponent(visitError.message)}`);
+    return { ok: false, error: visitError.message };
   }
 
   revalidatePath("/agenda");
   revalidatePath("/inicio");
   revalidatePath("/tablero");
-  redirect("/agenda");
+  return { ok: true };
 }
 
 export async function reassignVisit(formData: FormData) {
