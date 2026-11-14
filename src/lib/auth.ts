@@ -1,27 +1,27 @@
 import "server-only";
 
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { roleHome, type AppRole } from "@/lib/auth/roles";
 
-export async function getCurrentProfile() {
+export const getCurrentProfile = cache(async () => {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: claimsData } = await supabase.auth.getClaims();
+  const userId = claimsData?.claims?.sub;
 
-  if (!user) return null;
+  if (!userId) return null;
 
   const { data: profile } = await supabase
     .from("profiles")
     .select("id, role, full_name")
-    .eq("id", user.id)
+    .eq("id", userId)
     .single();
 
-  return profile ? { supabase, user, profile } : null;
-}
+  return profile ? { supabase, user: { id: userId }, profile } : null;
+});
 
-export async function requireRole(expected: AppRole | AppRole[]) {
+export const requireRole = cache(async (expected: AppRole | AppRole[]) => {
   const session = await getCurrentProfile();
 
   if (!session) {
@@ -35,4 +35,4 @@ export async function requireRole(expected: AppRole | AppRole[]) {
   }
 
   return session;
-}
+});

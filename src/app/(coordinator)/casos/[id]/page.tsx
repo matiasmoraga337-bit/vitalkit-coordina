@@ -9,7 +9,6 @@ import {
   Receipt,
   TriangleAlert,
 } from "lucide-react";
-import { AppShell } from "@/components/app/app-shell";
 import { EmptyState } from "@/components/app/empty-state";
 import { PageHeader } from "@/components/app/page-header";
 import { RequestStatusBadge, VisitStatusBadge } from "@/components/app/status-badge";
@@ -23,7 +22,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { requireRole } from "@/lib/auth";
-import { getInitials } from "@/lib/auth/roles";
 import { getCoordinatorCase } from "@/lib/data/coordinator";
 import { disciplineMeta } from "@/lib/mock-data";
 import { formatCLP } from "@/lib/format";
@@ -37,7 +35,7 @@ export default async function CoordinatorCasePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const { supabase, profile } = await requireRole("coordinator");
+  const { supabase } = await requireRole("coordinator");
   const data = await getCoordinatorCase(supabase, id);
 
   if (!data) notFound();
@@ -45,10 +43,7 @@ export default async function CoordinatorCasePage({
   const pendingRequests = data.requests.filter((request) => request.status === "pending");
 
   return (
-    <AppShell
-      role="coordinator"
-      user={{ name: profile.full_name, detail: "Coordinación", initials: getInitials(profile.full_name) }}
-    >
+    <>
       <div className="space-y-6">
         <PageHeader
           eyebrow="Caso"
@@ -245,6 +240,6 @@ export default async function CoordinatorCasePage({
           </Card>
         </div>
       </div>
-    </AppShell>
+    </>
   );
 }

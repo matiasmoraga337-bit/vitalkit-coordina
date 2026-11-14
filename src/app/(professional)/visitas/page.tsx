@@ -1,13 +1,11 @@
 import Link from "next/link";
 import { ArrowRight, ClipboardCheck } from "lucide-react";
-import { AppShell } from "@/components/app/app-shell";
 import { EmptyState } from "@/components/app/empty-state";
 import { PageHeader } from "@/components/app/page-header";
 import { VisitStatusBadge } from "@/components/app/status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { requireRole } from "@/lib/auth";
-import { getInitials } from "@/lib/auth/roles";
 import { getProfessionalAgenda } from "@/lib/data/professional";
 import { disciplineMeta } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
@@ -21,10 +19,7 @@ export default async function ProfessionalVisitsPage() {
   const active = data.visits.filter((visit) => visit.status !== "completed");
 
   return (
-    <AppShell
-      role="professional"
-      user={{ name: profile.full_name, detail: "Profesional", initials: getInitials(profile.full_name) }}
-    >
+    <>
       <div className="space-y-6">
         <PageHeader
           eyebrow="Historial"
@@ -87,6 +82,6 @@ export default async function ProfessionalVisitsPage() {
           )}
         </section>
       </div>
-    </AppShell>
+    </>
   );
 }

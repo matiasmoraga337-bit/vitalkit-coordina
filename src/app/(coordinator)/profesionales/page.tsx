@@ -1,10 +1,9 @@
 import { BadgeCheck, MapPin, UserCheck, UserX } from "lucide-react";
-import { AppShell } from "@/components/app/app-shell";
 import { EmptyState } from "@/components/app/empty-state";
 import { FeedbackBanner } from "@/components/app/feedback-banner";
 import { PageHeader } from "@/components/app/page-header";
+import { SubmitButton } from "@/components/app/submit-button";
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -13,7 +12,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { requireRole } from "@/lib/auth";
-import { getInitials } from "@/lib/auth/roles";
 import {
   getCoordinatorAvailability,
   getCoordinatorDashboard,
@@ -32,7 +30,7 @@ export default async function CoordinatorProfessionalsPage({
   searchParams: Promise<{ error?: string; ok?: string }>;
 }) {
   const { error, ok } = await searchParams;
-  const { supabase, profile } = await requireRole("coordinator");
+  const { supabase } = await requireRole("coordinator");
   const [data, availability] = await Promise.all([
     getCoordinatorDashboard(supabase),
     getCoordinatorAvailability(supabase),
@@ -46,10 +44,7 @@ export default async function CoordinatorProfessionalsPage({
   }
 
   return (
-    <AppShell
-      role="coordinator"
-      user={{ name: profile.full_name, detail: "Coordinación", initials: getInitials(profile.full_name) }}
-    >
+    <>
       <div className="space-y-6">
         <PageHeader
           eyebrow="Equipo"
@@ -109,17 +104,21 @@ export default async function CoordinatorProfessionalsPage({
                       <form action={verifyProfessional}>
                         <input type="hidden" name="professional_id" value={professional.id} />
                         <input type="hidden" name="verification" value="verified" />
-                        <button type="submit" className={cn(buttonVariants({ size: "sm" }))}>
+                        <SubmitButton size="sm" pendingText="Verificando...">
                           Verificar
-                        </button>
+                        </SubmitButton>
                       </form>
                       <form action={verifyProfessional}>
                         <input type="hidden" name="professional_id" value={professional.id} />
                         <input type="hidden" name="verification" value="rejected" />
-                        <button type="submit" className={cn(buttonVariants({ variant: "outline", size: "sm" }))}>
+                        <SubmitButton
+                          variant="outline"
+                          size="sm"
+                          pendingText="Rechazando..."
+                        >
                           <UserX className="size-4" />
                           Rechazar
-                        </button>
+                        </SubmitButton>
                       </form>
                     </div>
                   </CardContent>
@@ -129,6 +128,6 @@ export default async function CoordinatorProfessionalsPage({
           </div>
         )}
       </div>
-    </AppShell>
+    </>
   );
 }

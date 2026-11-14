@@ -1,13 +1,11 @@
 import Link from "next/link";
 import { ArrowRight, CalendarDays, CalendarX2 } from "lucide-react";
-import { AppShell } from "@/components/app/app-shell";
 import { EmptyState } from "@/components/app/empty-state";
 import { PageHeader } from "@/components/app/page-header";
 import { VisitStatusBadge } from "@/components/app/status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { requireRole } from "@/lib/auth";
-import { getInitials } from "@/lib/auth/roles";
 import { getFamilyDashboard } from "@/lib/data/family";
 import { disciplineMeta } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
@@ -20,9 +18,9 @@ export default async function FamilyCalendarPage() {
 
   if (!data) {
     return (
-      <AppShell role="family" user={{ name: profile.full_name, detail: "Sin hogar", initials: getInitials(profile.full_name) }}>
+      <>
         <EmptyState icon={CalendarX2} title="Sin hogar asignado" description="La coordinadora todavía no vinculó tu cuenta." />
-      </AppShell>
+      </>
     );
   }
 
@@ -34,14 +32,7 @@ export default async function FamilyCalendarPage() {
   );
 
   return (
-    <AppShell
-      role="family"
-      user={{
-        name: profile.full_name,
-        detail: `${data.household.plan} · ${data.household.elderName}`,
-        initials: getInitials(profile.full_name),
-      }}
-    >
+    <>
       <div className="space-y-6">
         <PageHeader
           eyebrow="Calendario"
@@ -115,6 +106,6 @@ export default async function FamilyCalendarPage() {
           )}
         </section>
       </div>
-    </AppShell>
+    </>
   );
 }

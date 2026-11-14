@@ -9,12 +9,11 @@ import {
   UserCheck,
   Users,
 } from "lucide-react";
-import { AppShell } from "@/components/app/app-shell";
 import { requireRole } from "@/lib/auth";
 import { approveRequest } from "@/app/actions/visits";
 import { getCoordinatorDashboard } from "@/lib/data/coordinator";
-import { getInitials } from "@/lib/auth/roles";
 import { RequestStatusBadge, VisitStatusBadge } from "@/components/app/status-badge";
+import { SubmitButton } from "@/components/app/submit-button";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,18 +30,11 @@ import { cn } from "@/lib/utils";
 export const instant = false;
 
 export default async function CoordinatorDashboardPage() {
-  const { supabase, profile } = await requireRole("coordinator");
+  const { supabase } = await requireRole("coordinator");
   const data = await getCoordinatorDashboard(supabase);
   const pendingRequests = data.requests.filter((request) => request.status === "pending");
   return (
-    <AppShell
-      role="coordinator"
-      user={{
-        name: profile.full_name,
-        detail: "Coordinadora del piloto",
-        initials: getInitials(profile.full_name),
-      }}
-    >
+    <>
       <div className="space-y-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -215,12 +207,13 @@ export default async function CoordinatorDashboardPage() {
                         type="datetime-local"
                         required
                       />
-                      <button
-                        type="submit"
-                        className={cn(buttonVariants({ size: "sm" }), "w-full")}
+                      <SubmitButton
+                        size="sm"
+                        className="w-full"
+                        pendingText="Asignando..."
                       >
                         Aprobar y asignar
-                      </button>
+                      </SubmitButton>
                     </form>
                   </div>
                 ))}
@@ -266,6 +259,6 @@ export default async function CoordinatorDashboardPage() {
           </div>
         </div>
       </div>
-    </AppShell>
+    </>
   );
 }

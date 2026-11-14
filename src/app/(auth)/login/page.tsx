@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, ClipboardCheck, LayoutDashboard, UserRound } from "lucide-react";
+import { SubmitButton } from "@/components/app/submit-button";
 import { Logo } from "@/components/brand/logo";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -132,10 +132,10 @@ export default async function LoginPage({
                     required
                   />
                 </div>
-                <Button type="submit" className="w-full">
+                <SubmitButton className="w-full" pendingText="Entrando...">
                   Entrar
                   <ArrowRight className="size-4" />
-                </Button>
+                </SubmitButton>
               </form>
 
               <div className="flex items-center gap-3">

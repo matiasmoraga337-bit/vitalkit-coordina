@@ -7,6 +7,20 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|icons|manifest.webmanifest|sw.js).*)",
+    "/inicio/:path*",
+    "/calendario/:path*",
+    "/solicitudes/:path*",
+    "/plan/:path*",
+    "/factura/:path*",
+    "/mensajes/:path*",
+    "/visitas/:path*",
+    "/tablero/:path*",
+    "/casos/:path*",
+    "/solicitudes-coordinacion/:path*",
+    "/profesionales/:path*",
+    "/calendario-coordinacion/:path*",
+    "/agenda/:path*",
+    "/disponibilidad/:path*",
+    "/leads/:path*",
   ],
 };

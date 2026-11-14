@@ -1,8 +1,7 @@
 import { Clock3 } from "lucide-react";
-import { AppShell } from "@/components/app/app-shell";
 import { FeedbackBanner } from "@/components/app/feedback-banner";
+import { SubmitButton } from "@/components/app/submit-button";
 import { PageHeader } from "@/components/app/page-header";
-import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -12,10 +11,8 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { requireRole } from "@/lib/auth";
-import { getInitials } from "@/lib/auth/roles";
 import { getProfessionalAvailability } from "@/lib/data/professional";
 import { updateAvailability } from "@/app/actions/availability";
-import { cn } from "@/lib/utils";
 
 export const instant = false;
 
@@ -32,10 +29,7 @@ export default async function ProfessionalAvailabilityPage({
   const byWeekday = new Map(blocks.map((block) => [block.weekday, block]));
 
   return (
-    <AppShell
-      role="professional"
-      user={{ name: profile.full_name, detail: "Profesional", initials: getInitials(profile.full_name) }}
-    >
+    <>
       <div className="space-y-6">
         <PageHeader
           eyebrow="Disponibilidad"
@@ -88,16 +82,13 @@ export default async function ProfessionalAvailabilityPage({
                   </div>
                 );
               })}
-              <button
-                type="submit"
-                className={cn(buttonVariants(), "w-full")}
-              >
+              <SubmitButton className="w-full" pendingText="Guardando...">
                 Guardar disponibilidad
-              </button>
+              </SubmitButton>
             </form>
           </CardContent>
         </Card>
       </div>
-    </AppShell>
+    </>
   );
 }

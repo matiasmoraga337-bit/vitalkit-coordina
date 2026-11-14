@@ -1,5 +1,4 @@
 import { Receipt, Wallet } from "lucide-react";
-import { AppShell } from "@/components/app/app-shell";
 import { EmptyState } from "@/components/app/empty-state";
 import { PageHeader } from "@/components/app/page-header";
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +12,6 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { requireRole } from "@/lib/auth";
-import { getInitials } from "@/lib/auth/roles";
 import { getFamilyInvoices } from "@/lib/data/family";
 import { formatCLP } from "@/lib/format";
 
@@ -30,14 +28,7 @@ export default async function FamilyInvoicePage() {
   const invoices = await getFamilyInvoices(supabase, profile.id);
 
   return (
-    <AppShell
-      role="family"
-      user={{
-        name: profile.full_name,
-        detail: "Facturación",
-        initials: getInitials(profile.full_name),
-      }}
-    >
+    <>
       <div className="space-y-6">
         <PageHeader
           eyebrow="Facturación"
@@ -91,6 +82,6 @@ export default async function FamilyInvoicePage() {
           </div>
         )}
       </div>
-    </AppShell>
+    </>
   );
 }

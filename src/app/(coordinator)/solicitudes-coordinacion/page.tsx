@@ -1,10 +1,9 @@
 import { Inbox } from "lucide-react";
-import { AppShell } from "@/components/app/app-shell";
 import { EmptyState } from "@/components/app/empty-state";
 import { FeedbackBanner } from "@/components/app/feedback-banner";
 import { PageHeader } from "@/components/app/page-header";
 import { RequestStatusBadge } from "@/components/app/status-badge";
-import { buttonVariants } from "@/components/ui/button";
+import { SubmitButton } from "@/components/app/submit-button";
 import {
   Card,
   CardContent,
@@ -14,7 +13,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { requireRole } from "@/lib/auth";
-import { getInitials } from "@/lib/auth/roles";
 import { getCoordinatorDashboard } from "@/lib/data/coordinator";
 import { approveRequest } from "@/app/actions/visits";
 import { disciplineMeta } from "@/lib/mock-data";
@@ -34,16 +32,13 @@ export default async function CoordinatorRequestsPage({
   searchParams: Promise<{ error?: string; ok?: string }>;
 }) {
   const { error, ok } = await searchParams;
-  const { supabase, profile } = await requireRole("coordinator");
+  const { supabase } = await requireRole("coordinator");
   const data = await getCoordinatorDashboard(supabase);
   const pending = data.requests.filter((request) => request.status === "pending");
   const others = data.requests.filter((request) => request.status !== "pending");
 
   return (
-    <AppShell
-      role="coordinator"
-      user={{ name: profile.full_name, detail: "Coordinación", initials: getInitials(profile.full_name) }}
-    >
+    <>
       <div className="space-y-6">
         <PageHeader
           eyebrow="Solicitudes"
@@ -100,9 +95,9 @@ export default async function CoordinatorRequestsPage({
                         ))}
                     </select>
                     <Input name="scheduled_at" type="datetime-local" required />
-                    <button type="submit" className={cn(buttonVariants({ size: "sm" }), "w-full")}>
+                    <SubmitButton size="sm" className="w-full" pendingText="Asignando...">
                       Aprobar y asignar
-                    </button>
+                    </SubmitButton>
                   </form>
                 </div>
               ))
@@ -136,6 +131,6 @@ export default async function CoordinatorRequestsPage({
           </CardContent>
         </Card>
       </div>
-    </AppShell>
+    </>
   );
 }

@@ -10,9 +10,9 @@ import {
   MessageCircle,
   UserRound,
 } from "lucide-react";
-import { AppShell } from "@/components/app/app-shell";
 import { FeedbackBanner } from "@/components/app/feedback-banner";
 import { PageHeader } from "@/components/app/page-header";
+import { SubmitButton } from "@/components/app/submit-button";
 import { VisitStatusBadge } from "@/components/app/status-badge";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
@@ -26,13 +26,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { requireRole } from "@/lib/auth";
-import { getInitials, roleHome } from "@/lib/auth/roles";
+import { roleHome } from "@/lib/auth/roles";
 import { getVisitDetail } from "@/lib/data/visit";
 import { formatVisitDate, formatVisitTime } from "@/lib/format";
-import { disciplineMeta, type Role } from "@/lib/mock-data";
+import { disciplineMeta } from "@/lib/mock-data";
 import { cancelVisit, reassignVisit } from "@/app/actions/visits";
 import { createIncident, resolveIncident } from "@/app/actions/incidents";
-import { cn } from "@/lib/utils";
 
 export const instant = false;
 
@@ -54,28 +53,12 @@ export default async function VisitDetailPage({
 
   if (!data) notFound();
 
-  const appRole: Role =
-    profile.role === "coordinator" || profile.role === "admin"
-      ? "coordinator"
-      : profile.role;
   const discipline = disciplineMeta[data.visit.discipline];
   const professionalLabel = data.professional?.name ?? "Sin asignar";
   const professionalDiscipline = data.professional?.discipline ?? data.visit.discipline;
 
   return (
-    <AppShell
-      role={appRole}
-      user={{
-        name: profile.full_name,
-        detail:
-          profile.role === "family"
-            ? "Familia"
-            : profile.role === "professional"
-              ? "Profesional"
-              : "Coordinación",
-        initials: getInitials(profile.full_name),
-      }}
-    >
+    <>
       <div className="space-y-6">
         <PageHeader
           eyebrow="Detalle de visita"
@@ -172,12 +155,9 @@ export default async function VisitDetailPage({
                         ))}
                     </select>
                     <Input name="scheduled_at" type="datetime-local" />
-                    <button
-                      type="submit"
-                      className={cn(buttonVariants({ size: "sm" }), "w-full")}
-                    >
+                    <SubmitButton size="sm" className="w-full" pendingText="Guardando...">
                       Guardar cambios
-                    </button>
+                    </SubmitButton>
                   </form>
 
                   <form action={cancelVisit} className="space-y-2 rounded-xl border p-3">
@@ -188,15 +168,14 @@ export default async function VisitDetailPage({
                       rows={2}
                       placeholder="Motivo de la cancelación"
                     />
-                    <button
-                      type="submit"
-                      className={cn(
-                        buttonVariants({ variant: "outline", size: "sm" }),
-                        "w-full",
-                      )}
+                    <SubmitButton
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                      pendingText="Cancelando..."
                     >
                       Cancelar visita
-                    </button>
+                    </SubmitButton>
                   </form>
                 </div>
               ) : null}
@@ -320,12 +299,13 @@ export default async function VisitDetailPage({
                       <form action={resolveIncident}>
                         <input type="hidden" name="incident_id" value={incident.id} />
                         <input type="hidden" name="visit_id" value={data.visit.id} />
-                        <button
-                          type="submit"
-                          className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+                        <SubmitButton
+                          variant="outline"
+                          size="sm"
+                          pendingText="Resolviendo..."
                         >
                           Resolver
-                        </button>
+                        </SubmitButton>
                       </form>
                     )}
                 </div>
@@ -354,18 +334,20 @@ export default async function VisitDetailPage({
                     rows={3}
                     placeholder="Describe qué ocurrió."
                   />
-                  <button
-                    type="submit"
-                    className={cn(buttonVariants({ variant: "outline", size: "sm" }), "w-full")}
+                  <SubmitButton
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    pendingText="Registrando..."
                   >
                     Registrar incidencia
-                  </button>
+                  </SubmitButton>
                 </form>
               </details>
             )}
           </CardContent>
         </Card>
       </div>
-    </AppShell>
+    </>
   );
 }

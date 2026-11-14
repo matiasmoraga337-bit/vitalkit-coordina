@@ -1,10 +1,10 @@
 import { Inbox, Send } from "lucide-react";
-import { AppShell } from "@/components/app/app-shell";
 import { EmptyState } from "@/components/app/empty-state";
 import { FeedbackBanner } from "@/components/app/feedback-banner";
+import { SubmitButton } from "@/components/app/submit-button";
 import { PageHeader } from "@/components/app/page-header";
 import { RequestStatusBadge } from "@/components/app/status-badge";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -15,7 +15,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { requireRole } from "@/lib/auth";
-import { getInitials } from "@/lib/auth/roles";
 import { getFamilyDashboard } from "@/lib/data/family";
 import { createRequest } from "@/app/actions/visits";
 import { disciplineMeta } from "@/lib/mock-data";
@@ -39,14 +38,7 @@ export default async function FamilyRequestsPage({
   const data = await getFamilyDashboard(supabase, profile.id, profile.full_name);
 
   return (
-    <AppShell
-      role="family"
-      user={{
-        name: profile.full_name,
-        detail: data ? `${data.household.plan} · ${data.household.elderName}` : "Familia",
-        initials: getInitials(profile.full_name),
-      }}
-    >
+    <>
       <div className="space-y-6">
         <PageHeader
           eyebrow="Solicitudes"
@@ -109,13 +101,10 @@ export default async function FamilyRequestsPage({
                     placeholder="Cuéntanos qué necesita Elena o qué visita quieres cambiar."
                   />
                 </label>
-                <button
-                  type="submit"
-                  className={cn(buttonVariants(), "w-full")}
-                >
+                <SubmitButton className="w-full" pendingText="Enviando...">
                   <Send className="size-4" />
                   Enviar solicitud
-                </button>
+                </SubmitButton>
               </form>
             </CardContent>
           </Card>
@@ -157,6 +146,6 @@ export default async function FamilyRequestsPage({
           </Card>
         </div>
       </div>
-    </AppShell>
+    </>
   );
 }

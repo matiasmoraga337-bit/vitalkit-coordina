@@ -7,14 +7,13 @@ import {
   NotebookPen,
   PlayCircle,
 } from "lucide-react";
-import { AppShell } from "@/components/app/app-shell";
 import { requireRole } from "@/lib/auth";
 import { completeVisit, startVisit } from "@/app/actions/visits";
 import { getProfessionalAgenda } from "@/lib/data/professional";
-import { getInitials } from "@/lib/auth/roles";
 import { VisitStatusBadge } from "@/components/app/status-badge";
+import { SubmitButton } from "@/components/app/submit-button";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Card,
@@ -47,14 +46,7 @@ export default async function ProfessionalAgendaPage() {
   );
 
   return (
-    <AppShell
-      role="professional"
-      user={{
-        name: profile.full_name,
-        detail: "Kinesiólogo · Puerto Montt",
-        initials: getInitials(profile.full_name),
-      }}
-    >
+    <>
       <div className="space-y-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -180,13 +172,10 @@ export default async function ProfessionalAgendaPage() {
                         name="visit_id"
                         value={data.currentVisit.id}
                       />
-                      <button
-                        type="submit"
-                        className={cn(buttonVariants(), "w-full")}
-                      >
+                      <SubmitButton className="w-full" pendingText="Registrando...">
                         <PlayCircle className="size-4" />
                         Hacer check-in
-                      </button>
+                      </SubmitButton>
                     </form>
                   )}
                   <details className="rounded-xl border p-3">
@@ -205,13 +194,14 @@ export default async function ProfessionalAgendaPage() {
                         rows={3}
                         placeholder="Resumen de la visita, avances y recomendaciones."
                       />
-                      <button
-                        type="submit"
-                        className={cn(buttonVariants({ size: "sm" }), "w-full")}
+                      <SubmitButton
+                        size="sm"
+                        className="w-full"
+                        pendingText="Guardando..."
                       >
                         <NotebookPen className="size-4" />
                         Guardar y completar
-                      </button>
+                      </SubmitButton>
                     </form>
                   </details>
                   <Button variant="ghost" className="w-full" disabled>
@@ -232,6 +222,6 @@ export default async function ProfessionalAgendaPage() {
           </Card>
         </div>
       </div>
-    </AppShell>
+    </>
   );
 }

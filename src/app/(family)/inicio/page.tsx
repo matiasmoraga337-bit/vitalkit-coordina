@@ -9,12 +9,11 @@ import {
   Stethoscope,
   UserRound,
 } from "lucide-react";
-import { AppShell } from "@/components/app/app-shell";
 import { requireRole } from "@/lib/auth";
 import { createRequest } from "@/app/actions/visits";
 import { getFamilyDashboard } from "@/lib/data/family";
-import { getInitials } from "@/lib/auth/roles";
 import { RequestStatusBadge, VisitStatusBadge } from "@/components/app/status-badge";
+import { SubmitButton } from "@/components/app/submit-button";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -38,14 +37,7 @@ export default async function FamilyHomePage() {
 
   if (!data) {
     return (
-      <AppShell
-        role="family"
-        user={{
-          name: profile.full_name,
-          detail: "Sin hogar asignado",
-          initials: getInitials(profile.full_name),
-        }}
-      >
+      <>
         <Card>
           <CardHeader>
             <CardTitle>Sin hogar asignado</CardTitle>
@@ -54,7 +46,7 @@ export default async function FamilyHomePage() {
             </CardDescription>
           </CardHeader>
         </Card>
-      </AppShell>
+      </>
     );
   }
 
@@ -75,14 +67,7 @@ export default async function FamilyHomePage() {
 
   if (!nextVisit) {
     return (
-      <AppShell
-        role="family"
-        user={{
-          name: profile.full_name,
-          detail: `${household.plan} · ${household.elderName}`,
-          initials: getInitials(profile.full_name),
-        }}
-      >
+      <>
         <Card>
           <CardHeader>
             <CardTitle>Sin visitas programadas</CardTitle>
@@ -91,19 +76,12 @@ export default async function FamilyHomePage() {
             </CardDescription>
           </CardHeader>
         </Card>
-      </AppShell>
+      </>
     );
   }
 
   return (
-    <AppShell
-      role="family"
-      user={{
-        name: profile.full_name,
-        detail: `${household.plan} · ${household.elderName}`,
-        initials: getInitials(profile.full_name),
-      }}
-    >
+    <>
       <div className="space-y-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -361,12 +339,9 @@ export default async function FamilyHomePage() {
                       placeholder="Cuéntanos qué necesita Elena."
                     />
                   </label>
-                  <button
-                    type="submit"
-                    className={cn(buttonVariants({ size: "sm" }), "w-full")}
-                  >
+                  <SubmitButton size="sm" className="w-full" pendingText="Enviando...">
                     Enviar solicitud
-                  </button>
+                  </SubmitButton>
                 </form>
               </details>
               <div className="flex flex-wrap gap-2 pt-1">
@@ -382,6 +357,6 @@ export default async function FamilyHomePage() {
           </Card>
         </div>
       </div>
-    </AppShell>
+    </>
   );
 }

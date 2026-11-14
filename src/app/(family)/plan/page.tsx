@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { ClipboardList, MessageCircle, Target } from "lucide-react";
-import { AppShell } from "@/components/app/app-shell";
 import { EmptyState } from "@/components/app/empty-state";
 import { PageHeader } from "@/components/app/page-header";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -13,7 +12,6 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { requireRole } from "@/lib/auth";
-import { getInitials } from "@/lib/auth/roles";
 import { getFamilyDashboard } from "@/lib/data/family";
 import { cn } from "@/lib/utils";
 
@@ -25,21 +23,14 @@ export default async function FamilyCarePlanPage() {
 
   if (!data) {
     return (
-      <AppShell role="family" user={{ name: profile.full_name, detail: "Sin hogar", initials: getInitials(profile.full_name) }}>
+      <>
         <EmptyState icon={ClipboardList} title="Sin plan de cuidados" description="La coordinadora todavía no creó un plan para tu familia." />
-      </AppShell>
+      </>
     );
   }
 
   return (
-    <AppShell
-      role="family"
-      user={{
-        name: profile.full_name,
-        detail: `${data.household.plan} · ${data.household.elderName}`,
-        initials: getInitials(profile.full_name),
-      }}
-    >
+    <>
       <div className="space-y-6">
         <PageHeader
           eyebrow="Seguimiento"
@@ -113,6 +104,6 @@ export default async function FamilyCarePlanPage() {
           </div>
         )}
       </div>
-    </AppShell>
+    </>
   );
 }

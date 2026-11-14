@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { ArrowRight, Inbox, MessageCircle } from "lucide-react";
-import { AppShell } from "@/components/app/app-shell";
 import { EmptyState } from "@/components/app/empty-state";
 import { FeedbackBanner } from "@/components/app/feedback-banner";
 import { MessageThreadView } from "@/components/app/message-thread";
@@ -8,10 +7,8 @@ import { PageHeader } from "@/components/app/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { requireRole } from "@/lib/auth";
-import { getInitials } from "@/lib/auth/roles";
 import { getCoordinatorThreads, getFamilyThread } from "@/lib/data/messages";
 import { formatRelativeDate } from "@/lib/format";
-import type { Role } from "@/lib/mock-data";
 
 export const instant = false;
 
@@ -22,15 +19,11 @@ export default async function MessagesPage({
 }) {
   const { error, ok } = await searchParams;
   const { supabase, user, profile } = await requireRole(["family", "coordinator"]);
-  const role: Role = profile.role === "coordinator" ? "coordinator" : "family";
 
   if (profile.role === "family") {
     const thread = await getFamilyThread(supabase, profile.id, user.id);
     return (
-      <AppShell
-        role="family"
-        user={{ name: profile.full_name, detail: "Mensajes", initials: getInitials(profile.full_name) }}
-      >
+      <>
         <div className="space-y-6">
           <PageHeader
             eyebrow="Mensajes"
@@ -45,17 +38,14 @@ export default async function MessagesPage({
             <EmptyState icon={MessageCircle} title="Sin hogar asignado" description="La coordinadora todavía no vinculó tu cuenta." />
           )}
         </div>
-      </AppShell>
+      </>
     );
   }
 
   const threads = await getCoordinatorThreads(supabase, user.id);
 
   return (
-    <AppShell
-      role={role}
-      user={{ name: profile.full_name, detail: "Mensajes", initials: getInitials(profile.full_name) }}
-    >
+    <>
       <div className="space-y-6">
         <PageHeader
           eyebrow="Mensajes"
@@ -94,6 +84,6 @@ export default async function MessagesPage({
           ))}
         </div>
       </div>
-    </AppShell>
+    </>
   );
 }

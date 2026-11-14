@@ -1,25 +1,20 @@
 import Link from "next/link";
 import { ArrowRight, Inbox, Users } from "lucide-react";
-import { AppShell } from "@/components/app/app-shell";
 import { EmptyState } from "@/components/app/empty-state";
 import { PageHeader } from "@/components/app/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { requireRole } from "@/lib/auth";
-import { getInitials } from "@/lib/auth/roles";
 import { getCoordinatorCases } from "@/lib/data/coordinator";
 
 export const instant = false;
 
 export default async function CoordinatorCasesPage() {
-  const { supabase, profile } = await requireRole("coordinator");
+  const { supabase } = await requireRole("coordinator");
   const cases = await getCoordinatorCases(supabase);
 
   return (
-    <AppShell
-      role="coordinator"
-      user={{ name: profile.full_name, detail: "Coordinación", initials: getInitials(profile.full_name) }}
-    >
+    <>
       <div className="space-y-6">
         <PageHeader
           eyebrow="Casos"
@@ -66,6 +61,6 @@ export default async function CoordinatorCasesPage() {
           </div>
         )}
       </div>
-    </AppShell>
+    </>
   );
 }

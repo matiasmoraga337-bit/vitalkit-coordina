@@ -1,5 +1,5 @@
 import { CheckCheck, MessageCircle, Send } from "lucide-react";
-import { buttonVariants } from "@/components/ui/button";
+import { SubmitButton } from "@/components/app/submit-button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import type { MessageThread } from "@/lib/data/messages";
@@ -25,10 +25,10 @@ export function MessageThreadView({
           <form action={markMessagesRead}>
             <input type="hidden" name="household_id" value={thread.householdId} />
             <input type="hidden" name="redirect_to" value={redirectTo} />
-            <button type="submit" className={cn(buttonVariants({ variant: "outline", size: "sm" }))}>
+            <SubmitButton variant="outline" size="sm" pendingText="Marcando...">
               <CheckCheck className="size-4" />
               Marcar leído
-            </button>
+            </SubmitButton>
           </form>
         )}
       </CardHeader>
@@ -73,10 +73,10 @@ export function MessageThreadView({
             rows={3}
             placeholder="Escribe un mensaje a coordinación..."
           />
-          <button type="submit" className={cn(buttonVariants(), "w-full")}>
+          <SubmitButton className="w-full" pendingText="Enviando...">
             <Send className="size-4" />
             Enviar mensaje
-          </button>
+          </SubmitButton>
         </form>
       </CardContent>
     </Card>
