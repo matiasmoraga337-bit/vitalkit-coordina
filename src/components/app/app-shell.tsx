@@ -15,9 +15,11 @@ import {
   MessageCircle,
   Receipt,
   UserCheck,
+  UserPlus,
   Users,
 } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -76,6 +78,7 @@ const roleConfig: Record<
       { label: "Casos", href: "/casos", icon: Users },
       { label: "Solicitudes", href: "/solicitudes-coordinacion", icon: Inbox },
       { label: "Profesionales", href: "/profesionales", icon: UserCheck },
+      { label: "Leads", href: "/leads", icon: UserPlus },
       { label: "Calendario", href: "/calendario-coordinacion", icon: CalendarDays },
       { label: "Mensajes", href: "/mensajes", icon: MessageCircle },
     ],
@@ -171,6 +174,10 @@ function SidebarContent({ role, user }: { role: Role; user?: { name: string; det
             <p className="truncate text-xs text-muted-foreground">{displayUser.detail}</p>
           </div>
         </div>
+        <div className="mt-2 flex items-center justify-between px-1">
+          <span className="text-xs text-muted-foreground">Tema</span>
+          <ThemeToggle />
+        </div>
         <form action={signOut} className="mt-2">
           <Button
             type="submit"
@@ -227,6 +234,7 @@ export function AppShell({
           <Badge variant="outline" className="ml-auto rounded-full text-[10px] uppercase tracking-wide">
             Demo
           </Badge>
+          <ThemeToggle />
         </header>
 
         <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">

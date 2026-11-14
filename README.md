@@ -19,6 +19,9 @@ PWA de coordinación de cuidado domiciliario para familias de Puerto Montt. Cone
 - [x] Chat familia ↔ coordinación
 - [x] Disponibilidad profesional editable
 - [x] PWA: manifest y service worker
+- [x] Landing React en `/` con formulario de evaluaci?n
+- [x] Leads reales y bandeja `/leads`
+- [x] Tema claro por defecto con toggle a oscuro
 - [x] Deploy en Vercel
 - [ ] Validación con 5 personas (fuera del alcance actual)
 - [ ] Informe y presentación (fuera del alcance actual)

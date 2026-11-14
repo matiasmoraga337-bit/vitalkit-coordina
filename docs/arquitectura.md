@@ -28,6 +28,7 @@
 /casos/[id]             Caso completo
 /solicitudes-coordinacion Bandeja de solicitudes
 /profesionales          Equipo y verificación
+/leads                  Leads de la landing
 /calendario-coordinacion Agenda global
 /agenda                 Vista profesional
 /visitas                Historial del profesional

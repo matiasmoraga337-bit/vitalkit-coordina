@@ -394,6 +394,62 @@ export type Database = {
           },
         ]
       }
+      leads: {
+        Row: {
+          comuna: string | null
+          consent: boolean
+          created_at: string
+          email: string
+          id: string
+          message: string | null
+          name: string
+          needs: Json
+          phone: string | null
+          plan_id: string | null
+          source: string
+          status: Database["public"]["Enums"]["lead_status"]
+          updated_at: string
+        }
+        Insert: {
+          comuna?: string | null
+          consent?: boolean
+          created_at?: string
+          email: string
+          id?: string
+          message?: string | null
+          name: string
+          needs?: Json
+          phone?: string | null
+          plan_id?: string | null
+          source?: string
+          status?: Database["public"]["Enums"]["lead_status"]
+          updated_at?: string
+        }
+        Update: {
+          comuna?: string | null
+          consent?: boolean
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string | null
+          name?: string
+          needs?: Json
+          phone?: string | null
+          plan_id?: string | null
+          source?: string
+          status?: Database["public"]["Enums"]["lead_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           body: string
@@ -774,6 +830,7 @@ export type Database = {
       app_role: "family" | "coordinator" | "professional" | "admin"
       discipline: "kinesiologia" | "nutricion" | "enfermeria" | "aseo"
       incident_status: "open" | "in_review" | "resolved"
+      lead_status: "new" | "contacted" | "converted" | "discarded"
       request_status: "pending" | "approved" | "rejected"
       request_type: "extra_visit" | "change" | "contact"
       verification_status: "pending" | "verified" | "rejected"
@@ -916,6 +973,7 @@ export const Constants = {
       app_role: ["family", "coordinator", "professional", "admin"],
       discipline: ["kinesiologia", "nutricion", "enfermeria", "aseo"],
       incident_status: ["open", "in_review", "resolved"],
+      lead_status: ["new", "contacted", "converted", "discarded"],
       request_status: ["pending", "approved", "rejected"],
       request_type: ["extra_visit", "change", "contact"],
       verification_status: ["pending", "verified", "rejected"],
