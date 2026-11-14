@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import {
   CalendarDays,
   ClipboardCheck,
@@ -99,7 +100,14 @@ const roleConfig: Record<
 
 function SidebarContent({ role, user }: { role: Role; user?: { name: string; detail: string; initials: string } }) {
   const pathname = usePathname();
+  const router = useRouter();
   const config = roleConfig[role];
+
+  useEffect(() => {
+    config.nav
+      .filter((item) => !item.disabled)
+      .forEach((item) => router.prefetch(item.href));
+  }, [config.nav, router]);
   const displayUser = user ?? {
     name: config.userName,
     detail: config.userDetail,
