@@ -104,10 +104,15 @@ function SidebarContent({ role, user }: { role: Role; user?: { name: string; det
   const config = roleConfig[role];
 
   useEffect(() => {
-    config.nav
-      .filter((item) => !item.disabled)
-      .forEach((item) => router.prefetch(item.href));
-  }, [config.nav, router]);
+    const targets = config.nav.filter(
+      (item) => !item.disabled && item.href !== pathname,
+    );
+    const timers = targets.map((item, index) =>
+      window.setTimeout(() => router.prefetch(item.href), index * 150),
+    );
+
+    return () => timers.forEach((timer) => window.clearTimeout(timer));
+  }, [config.nav, pathname, router]);
   const displayUser = user ?? {
     name: config.userName,
     detail: config.userDetail,
