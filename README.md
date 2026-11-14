@@ -57,6 +57,14 @@ npm run check      # lint + typecheck + build
 npm run seed       # crea usuarios y datos demo en Supabase
 ```
 
+## Performance
+
+- Autenticaci?n deduplicada con `getClaims` y `cache()`.
+- `AppShell` persistente por layout; ya no se remonta en cada navegaci?n.
+- Skeletons con `loading.tsx` y botones con estado pendiente.
+- Chat y disponibilidad con actualizaci?n optimista.
+- Mediciones locales: navegaci?n entre vistas ~90 ms, mensaje visible ~80 ms, cambio de disponibilidad ~40 ms.
+
 ## Supabase
 
 - Proyecto: `vitalkit-coordina` (São Paulo).
