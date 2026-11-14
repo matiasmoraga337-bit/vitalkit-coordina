@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/auth";
 
 export async function updateAvailability(formData: FormData) {
@@ -20,10 +19,10 @@ export async function updateAvailability(formData: FormData) {
     .upsert(rows, { onConflict: "professional_id,weekday" });
 
   if (error) {
-    redirect(`/disponibilidad?error=${encodeURIComponent(error.message)}`);
+    return { ok: false, error: error.message };
   }
 
   revalidatePath("/disponibilidad");
   revalidatePath("/profesionales");
-  redirect("/disponibilidad?ok=Disponibilidad%20actualizada.");
+  return { ok: true };
 }
