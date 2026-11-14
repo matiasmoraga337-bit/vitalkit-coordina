@@ -1,18 +1,10 @@
-"use client";
-
-import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
-import { flushSync } from "react-dom";
-import { Inbox, Loader2, Send } from "lucide-react";
-import { toast } from "sonner";
-import { RequestStatusBadge } from "@/components/app/status-badge";
+import Link from "next/link";
+import { Inbox, Plus } from "lucide-react";
 import { EmptyState } from "@/components/app/empty-state";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { RequestStatusBadge } from "@/components/app/status-badge";
 import { buttonVariants } from "@/components/ui/button";
-import { createRequest } from "@/app/actions/visits";
 import type { FamilyRequest } from "@/lib/data/family";
-import { disciplineMeta, type Discipline } from "@/lib/mock-data";
+import { disciplineMeta } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
 const typeLabel: Record<string, string> = {
@@ -23,69 +15,19 @@ const typeLabel: Record<string, string> = {
 
 export function FamilyRequestsPanel({
   initialRequests,
-  showForm = true,
 }: {
   initialRequests: FamilyRequest[];
-  showForm?: boolean;
 }) {
-  const [requests, setRequests] = useState(initialRequests);
-  const [pending, startTransition] = useTransition();
-  const router = useRouter();
-
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const form = event.currentTarget;
-    const formData = new FormData(form);
-    const discipline = String(formData.get("discipline") ?? "kinesiologia") as Discipline;
-    const reason = String(formData.get("reason") ?? "").trim();
-    const type = String(formData.get("type") ?? "extra_visit");
-
-    if (!reason) {
-      toast.error("Cuéntanos el motivo de la solicitud.");
-      return;
-    }
-
-    const optimistic: FamilyRequest = {
-      id: `optimistic-${Date.now()}`,
-      type,
-      discipline,
-      requestedBy: "Tú",
-      date: "Ahora",
-      status: "pending",
-      reason,
-    };
-
-    flushSync(() => {
-      setRequests((current) => [optimistic, ...current]);
-    });
-    form.reset();
-
-    startTransition(async () => {
-      const result = await createRequest(formData);
-
-      if (result?.error) {
-        setRequests((current) =>
-          current.filter((request) => request.id !== optimistic.id),
-        );
-        toast.error(result.error);
-        return;
-      }
-
-      toast.success("Solicitud enviada.");
-      router.refresh();
-    });
-  }
-
   return (
     <div className="space-y-3">
-      {requests.length === 0 ? (
+      {initialRequests.length === 0 ? (
         <EmptyState
           icon={Inbox}
           title="Sin solicitudes"
           description="Cuando pidas una visita extra o un cambio aparecerá aquí."
         />
       ) : (
-        requests.map((request) => (
+        initialRequests.map((request) => (
           <div key={request.id} className="rounded-xl border p-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex flex-wrap items-center gap-2">
@@ -107,81 +49,22 @@ export function FamilyRequestsPanel({
               {request.requestedBy} · {request.date}
             </p>
             <p className="mt-2 text-sm leading-6">{request.reason}</p>
+            {request.visitLabel && (
+              <p className="mt-1 rounded-lg bg-muted/50 px-2 py-1 text-xs text-muted-foreground">
+                Visita vinculada: {request.visitLabel}
+              </p>
+            )}
           </div>
         ))
       )}
 
-      {showForm && (
-        <details className="rounded-xl border p-3" open={requests.length === 0}>
-          <summary className="cursor-pointer text-sm font-semibold text-primary">
-            Pedir visita extra
-          </summary>
-          <form onSubmit={handleSubmit} className="mt-3 space-y-2">
-            <label className="space-y-1 text-xs font-medium">
-              Tipo
-              <select
-                name="type"
-                defaultValue="extra_visit"
-                className="h-9 w-full rounded-lg border bg-background px-2.5 text-sm"
-              >
-                <option value="extra_visit">Visita extra</option>
-                <option value="change">Cambio de visita</option>
-                <option value="contact">Contacto con coordinación</option>
-              </select>
-            </label>
-            <label className="space-y-1 text-xs font-medium">
-              Disciplina
-              <select
-                name="discipline"
-                required
-                className="h-9 w-full rounded-lg border bg-background px-2.5 text-sm"
-              >
-                <option value="kinesiologia">Kinesiología</option>
-                <option value="nutricion">Nutrición</option>
-                <option value="enfermeria">Enfermería</option>
-                <option value="aseo">Aseo</option>
-              </select>
-            </label>
-            <div className="grid gap-2 sm:grid-cols-2">
-              <label className="space-y-1 text-xs font-medium">
-                Fecha preferida
-                <Input name="preferred_date" type="date" />
-              </label>
-              <label className="space-y-1 text-xs font-medium">
-                Hora preferida
-                <Input name="preferred_time" type="time" />
-              </label>
-            </div>
-            <label className="space-y-1 text-xs font-medium">
-              Motivo
-              <Textarea
-                name="reason"
-                required
-                rows={3}
-                placeholder="Cuéntanos qué necesita Elena."
-              />
-            </label>
-            <button
-              type="submit"
-              className={cn(buttonVariants({ size: "sm" }), "w-full")}
-              disabled={pending}
-              aria-busy={pending}
-            >
-              {pending ? (
-                <>
-                  <Loader2 className="size-4 animate-spin" />
-                  Enviando...
-                </>
-              ) : (
-                <>
-                  <Send className="size-4" />
-                  Enviar solicitud
-                </>
-              )}
-            </button>
-          </form>
-        </details>
-      )}
+      <Link
+        href="/solicitudes?pedir=1&type=extra_visit"
+        className={cn(buttonVariants({ variant: "outline" }), "w-full")}
+      >
+        <Plus className="size-4" />
+        Nueva solicitud
+      </Link>
     </div>
   );
 }

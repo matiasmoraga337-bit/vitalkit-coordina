@@ -225,10 +225,12 @@ function SidebarContent({ role, user }: { role: Role; user?: { name: string; det
 export function AppShell({
   role,
   user,
+  bottomNav,
   children,
 }: {
   role: Role;
   user?: { name: string; detail: string; initials: string };
+  bottomNav?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
@@ -268,10 +270,17 @@ export function AppShell({
           <ThemeToggle />
         </header>
 
-        <main id="app-content" className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+        <main
+          id="app-content"
+          className={cn(
+            "mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8",
+            bottomNav && "pb-24 lg:pb-8",
+          )}
+        >
           {children}
         </main>
       </div>
+      {bottomNav}
     </div>
   );
 }

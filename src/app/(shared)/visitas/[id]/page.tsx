@@ -15,6 +15,7 @@ import { FeedbackBanner } from "@/components/app/feedback-banner";
 import { PageHeader } from "@/components/app/page-header";
 import { SubmitButton } from "@/components/app/submit-button";
 import { VisitStatusBadge } from "@/components/app/status-badge";
+import { VisitTimeline } from "@/components/family/visit-timeline";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -85,6 +86,12 @@ export default async function VisitDetailPage({
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="rounded-xl border bg-muted/20 p-3">
+                <VisitTimeline
+                  status={data.visit.status}
+                  cancellationReason={data.visit.cancellation_reason}
+                />
+              </div>
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="rounded-xl border bg-muted/30 p-3">
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -195,7 +202,10 @@ export default async function VisitDetailPage({
 
               {profile.role === "family" ? (
                 <div className="flex flex-wrap gap-2">
-                  <Link href="/solicitudes" className={buttonVariants({ variant: "outline", size: "sm" })}>
+                  <Link
+                    href={`/solicitudes?pedir=1&type=change&visit=${data.visit.id}`}
+                    className={buttonVariants({ variant: "outline", size: "sm" })}
+                  >
                     <MessageCircle className="size-4" />
                     Pedir un cambio
                   </Link>

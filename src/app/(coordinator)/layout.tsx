@@ -12,7 +12,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
       role="coordinator"
       user={{
         name: profile.full_name,
-        detail: "Coordinaci?n",
+        detail: "Coordinación",
         initials: getInitials(profile.full_name),
       }}
     >

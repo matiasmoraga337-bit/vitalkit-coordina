@@ -14,7 +14,7 @@ import { LandingFooter } from "@/components/landing/landing-footer";
 export const metadata: Metadata = {
   title: { absolute: "VitalKit ? Cuidado coordinado a domicilio" },
   description:
-    "Kinesiolog?a, nutrici?n, enfermer?a y aseo coordinados en un solo plan para familias de Puerto Montt.",
+    "Kinesiología, nutrición, enfermería y aseo coordinados en un solo plan para familias de Puerto Montt.",
   openGraph: {
     title: "VitalKit ? Cuidado coordinado a domicilio",
     description:

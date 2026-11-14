@@ -35,6 +35,8 @@ export type CoordinatorRequest = {
   date: string;
   status: RequestStatus;
   reason: string;
+  visitId: string | null;
+  visitLabel: string | null;
 };
 
 export type CoordinatorProfessional = {
@@ -113,6 +115,17 @@ export async function getCoordinatorDashboard(
       status: visit.status as VisitStatus,
     }));
 
+  const visitLabels = new Map(
+    visits.map((visit) => {
+      const discipline = (professionalDisciplines.get(visit.professional_id ?? "") ??
+        visit.discipline) as Discipline;
+      return [
+        visit.id,
+        `${professionalRole[discipline]} ? ${formatVisitDate(visit.scheduled_at)} ${formatVisitTime(visit.scheduled_at)}`,
+      ];
+    }),
+  );
+
   const mappedRequests: CoordinatorRequest[] = requests.map((request) => ({
     id: request.id,
     householdId: request.household_id,
@@ -124,6 +137,8 @@ export async function getCoordinatorDashboard(
     date: formatRelativeDate(request.created_at),
     status: request.status as RequestStatus,
     reason: request.reason,
+    visitId: request.visit_id,
+    visitLabel: request.visit_id ? (visitLabels.get(request.visit_id) ?? null) : null,
   }));
 
   const visitsToday = visits.filter(
@@ -221,7 +236,7 @@ export async function getCoordinatorCases(supabase: Client): Promise<Coordinator
       elder: elderByHousehold.get(household.id) ?? "Persona mayor",
       plan: household.plan_id ? (planById.get(household.plan_id) ?? "Sin plan") : "Sin plan",
       coordinator: household.coordinator_id ? (profileById.get(household.coordinator_id) ?? "Sin coordinador") : "Sin coordinador",
-      nextVisit: nextVisit ? `${formatVisitDate(nextVisit.scheduled_at)} ? ${formatVisitTime(nextVisit.scheduled_at)}` : "Sin pr?xima visita",
+      nextVisit: nextVisit ? `${formatVisitDate(nextVisit.scheduled_at)} · ${formatVisitTime(nextVisit.scheduled_at)}` : "Sin próxima visita",
       pendingRequests: pendingByHousehold.get(household.id) ?? 0,
     };
   });

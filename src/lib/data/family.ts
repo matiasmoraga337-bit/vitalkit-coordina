@@ -24,6 +24,7 @@ export type FamilyVisit = {
   discipline: Discipline;
   professional: string;
   professionalRole: string;
+  scheduledAt: string;
   date: string;
   time: string;
   status: VisitStatus;
@@ -38,6 +39,8 @@ export type FamilyRequest = {
   date: string;
   status: RequestStatus;
   reason: string;
+  visitId: string | null;
+  visitLabel: string | null;
 };
 
 export type FamilyDashboard = {
@@ -165,12 +168,24 @@ export async function getFamilyDashboard(
       professional:
         visit.professionals?.profiles?.full_name ?? "Profesional asignado",
       professionalRole: professionalRole[discipline],
+      scheduledAt: visit.scheduled_at,
       date: formatVisitDate(visit.scheduled_at),
       time: formatVisitTime(visit.scheduled_at),
       status: visit.status,
       note: visit.visit_reports?.summary,
     };
   });
+
+  const visitLabels = new Map(
+    visits.map((visit) => {
+      const discipline = (visit.professionals?.discipline ??
+        visit.discipline) as Discipline;
+      return [
+        visit.id,
+        `${professionalRole[discipline]} ? ${formatVisitDate(visit.scheduled_at)} ${formatVisitTime(visit.scheduled_at)}`,
+      ];
+    }),
+  );
 
   const mappedRequests: FamilyRequest[] = requests.map((request) => ({
     id: request.id,
@@ -180,6 +195,8 @@ export async function getFamilyDashboard(
     date: formatRelativeDate(request.created_at),
     status: request.status as RequestStatus,
     reason: request.reason,
+    visitId: request.visit_id,
+    visitLabel: request.visit_id ? (visitLabels.get(request.visit_id) ?? null) : null,
   }));
 
   const now = new Date();

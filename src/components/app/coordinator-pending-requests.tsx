@@ -54,7 +54,7 @@ export function CoordinatorPendingRequests({
           toast.error(result.error);
           return;
         }
-        toast.success("Solicitud aprobada y visita asignada.");
+        toast.success("Solicitud actualizada.");
         router.refresh();
       })
       .finally(() => setPendingId(null));
@@ -100,24 +100,33 @@ export function CoordinatorPendingRequests({
               {request.requestedBy} · {request.date}
             </p>
             <p className="mt-2 text-sm leading-6">{request.reason}</p>
+            {request.visitLabel && (
+              <p className="mt-2 rounded-lg bg-muted/50 px-2 py-1 text-xs text-muted-foreground">
+                Visita vinculada: {request.visitLabel}
+              </p>
+            )}
             <form
               onSubmit={(event) => handleSubmit(event, request)}
               className="mt-3 space-y-2"
             >
               <input type="hidden" name="request_id" value={request.id} />
-              <select
-                name="professional_id"
-                required
-                className="h-9 w-full rounded-lg border bg-background px-2.5 text-sm"
-              >
-                <option value="">Selecciona profesional</option>
-                {available.map((professional) => (
-                  <option key={professional.id} value={professional.id}>
-                    {professional.name}
-                  </option>
-                ))}
-              </select>
-              <Input name="scheduled_at" type="datetime-local" required />
+              {request.type !== "contact" && (
+                <>
+                  <select
+                    name="professional_id"
+                    required
+                    className="h-9 w-full rounded-lg border bg-background px-2.5 text-sm"
+                  >
+                    <option value="">Selecciona profesional</option>
+                    {available.map((professional) => (
+                      <option key={professional.id} value={professional.id}>
+                        {professional.name}
+                      </option>
+                    ))}
+                  </select>
+                  <Input name="scheduled_at" type="datetime-local" required />
+                </>
+              )}
               <button
                 type="submit"
                 className={cn(buttonVariants({ size: "sm" }), "w-full")}
@@ -127,8 +136,12 @@ export function CoordinatorPendingRequests({
                 {pending ? (
                   <>
                     <Loader2 className="size-4 animate-spin" />
-                    Asignando...
+                    Guardando...
                   </>
+                ) : request.type === "contact" ? (
+                  "Marcar atendido"
+                ) : request.type === "change" ? (
+                  "Confirmar cambio"
                 ) : (
                   "Aprobar y asignar"
                 )}

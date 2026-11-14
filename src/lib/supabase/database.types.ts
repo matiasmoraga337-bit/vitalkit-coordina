@@ -595,6 +595,7 @@ export type Database = {
           reviewed_by: string | null
           status: Database["public"]["Enums"]["request_status"]
           type: Database["public"]["Enums"]["request_type"]
+          visit_id: string | null
         }
         Insert: {
           created_at?: string
@@ -609,6 +610,7 @@ export type Database = {
           reviewed_by?: string | null
           status?: Database["public"]["Enums"]["request_status"]
           type?: Database["public"]["Enums"]["request_type"]
+          visit_id?: string | null
         }
         Update: {
           created_at?: string
@@ -623,6 +625,7 @@ export type Database = {
           reviewed_by?: string | null
           status?: Database["public"]["Enums"]["request_status"]
           type?: Database["public"]["Enums"]["request_type"]
+          visit_id?: string | null
         }
         Relationships: [
           {
@@ -644,6 +647,13 @@ export type Database = {
             columns: ["reviewed_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "requests_visit_id_fkey"
+            columns: ["visit_id"]
+            isOneToOne: false
+            referencedRelation: "visits"
             referencedColumns: ["id"]
           },
         ]

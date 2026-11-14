@@ -1,9 +1,12 @@
 import Link from "next/link";
 import { cacheLife, cacheTag } from "next/cache";
-import { ClipboardList, MessageCircle, Target } from "lucide-react";
+import { ClipboardList, MessageCircle, Target, Users } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { PrintPlanButton } from "@/components/family/print-plan-button";
+import { formatCLP } from "@/lib/format";
 import { EmptyState } from "@/components/app/empty-state";
 import { PageHeader } from "@/components/app/page-header";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -49,6 +52,67 @@ export default async function FamilyCarePlanPage() {
             </Link>
           }
         />
+
+        <Card>
+          <CardHeader className="flex-row items-start justify-between gap-4">
+            <div>
+              <CardDescription>Plan activo</CardDescription>
+              <CardTitle className="text-xl">
+                {data.household.plan} ? {formatCLP(data.household.planPrice)} / mes
+              </CardTitle>
+            </div>
+            <Badge variant="outline" className="rounded-full">
+              {data.stats.visitsThisMonth} de {data.stats.planVisits} visitas
+            </Badge>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Uso del mes</span>
+                <span className="font-semibold">
+                  {data.stats.visitsThisMonth} de {data.stats.planVisits}
+                </span>
+              </div>
+              <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-full rounded-full bg-primary"
+                  style={{
+                    width: `${Math.min(
+                      Math.round(
+                        (data.stats.visitsThisMonth / Math.max(data.stats.planVisits, 1)) * 100,
+                      ),
+                      100,
+                    )}%`,
+                  }}
+                />
+              </div>
+            </div>
+            <div>
+              <p className="flex items-center gap-2 text-sm font-semibold">
+                <Users className="size-4 text-primary" />
+                Equipo de cuidado
+              </p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {[
+                  ...new Map(
+                    data.visits.map((visit) => [
+                      visit.professional,
+                      { name: visit.professional, role: visit.professionalRole },
+                    ]),
+                  ).values(),
+                ].map((member) => (
+                  <Badge key={member.name} variant="outline" className="rounded-full">
+                    {member.name} ? {member.role}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Coordinadora: {data.household.coordinator} · Próxima revisión:{" "}
+              {data.carePlan?.nextReview ?? "Sin fecha"}
+            </p>
+          </CardContent>
+        </Card>
 
         {!data.carePlan ? (
           <EmptyState icon={ClipboardList} title="Sin plan registrado" description="La coordinadora completará el plan después de la evaluación inicial." />
@@ -101,9 +165,9 @@ export default async function FamilyCarePlanPage() {
                 <p className="text-xs text-muted-foreground">
                   Próxima revisión: {data.carePlan.nextReview}
                 </p>
-                <Button variant="outline" className="w-full" disabled>
-                  Descargar plan
-                </Button>
+                <div className="pt-1">
+                  <PrintPlanButton />
+                </div>
               </CardContent>
             </Card>
           </div>

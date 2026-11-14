@@ -196,3 +196,30 @@ export async function getThreadForCoordinatorCached(
   const supabase = await createClient();
   return getThreadForCoordinator(supabase, householdId, currentUserId);
 }
+
+export async function getFamilyUnreadCountCached(
+  profileId: string,
+  currentUserId: string,
+) {
+  "use cache: private";
+  cacheLife({ stale: 60, revalidate: 30, expire: 300 });
+  cacheTag("messages");
+  const supabase = await createClient();
+  const { data: membership } = await supabase
+    .from("household_members")
+    .select("household_id")
+    .eq("profile_id", profileId)
+    .limit(1)
+    .maybeSingle();
+
+  if (!membership) return 0;
+
+  const { count } = await supabase
+    .from("messages")
+    .select("*", { count: "exact", head: true })
+    .eq("household_id", membership.household_id)
+    .neq("sender_id", currentUserId)
+    .is("read_at", null);
+
+  return count ?? 0;
+}

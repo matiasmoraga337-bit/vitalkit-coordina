@@ -32,9 +32,15 @@ export async function createRequest(formData: FormData) {
   const reason = String(formData.get("reason") ?? "").trim();
   const requestedType = String(formData.get("type") ?? "extra_visit");
   const type = requestTypes.has(requestedType) ? requestedType : "extra_visit";
+  const visitId =
+    type === "change" ? String(formData.get("visit_id") ?? "").trim() || null : null;
 
   if (!discipline || !reason) {
     return { ok: false, error: "Completa la disciplina y el motivo." };
+  }
+
+  if (type === "change" && !visitId) {
+    return { ok: false, error: "Selecciona la visita que quieres cambiar." };
   }
 
   const { data: membership } = await supabase
@@ -48,6 +54,19 @@ export async function createRequest(formData: FormData) {
     return { ok: false, error: "No tienes un hogar asignado." };
   }
 
+  if (visitId) {
+    const { data: visit } = await supabase
+      .from("visits")
+      .select("id")
+      .eq("id", visitId)
+      .eq("household_id", membership.household_id)
+      .maybeSingle();
+
+    if (!visit) {
+      return { ok: false, error: "La visita seleccionada no pertenece a tu hogar." };
+    }
+  }
+
   const { error } = await supabase.from("requests").insert({
     household_id: membership.household_id,
     requested_by: profile.id,
@@ -56,6 +75,7 @@ export async function createRequest(formData: FormData) {
     preferred_time: preferredTime,
     reason,
     type: type as Database["public"]["Enums"]["request_type"],
+    visit_id: visitId,
     status: "pending",
   });
 
@@ -75,13 +95,13 @@ export async function approveRequest(formData: FormData) {
   const professionalId = String(formData.get("professional_id") ?? "");
   const scheduledAtInput = String(formData.get("scheduled_at") ?? "");
 
-  if (!requestId || !professionalId || !scheduledAtInput) {
-    return { ok: false, error: "Selecciona profesional y horario." };
+  if (!requestId) {
+    return { ok: false, error: "Solicitud no encontrada." };
   }
 
-  const scheduledAt = new Date(scheduledAtInput);
-  if (Number.isNaN(scheduledAt.getTime())) {
-    return { ok: false, error: "Horario inv?lido." };
+  const scheduledAt = scheduledAtInput ? new Date(scheduledAtInput) : null;
+  if (scheduledAtInput && (!scheduledAt || Number.isNaN(scheduledAt.getTime()))) {
+    return { ok: false, error: "Horario inválido." };
   }
 
   const { data: request, error: requestError } = await supabase
@@ -94,33 +114,75 @@ export async function approveRequest(formData: FormData) {
     return { ok: false, error: "Solicitud no encontrada." };
   }
 
-  const { data: elder } = await supabase
-    .from("elders")
-    .select("id")
-    .eq("household_id", request.household_id)
-    .limit(1)
-    .maybeSingle();
+  if (request.type === "contact") {
+    const { error: contactError } = await supabase
+      .from("requests")
+      .update({
+        status: "approved",
+        reviewed_by: profile.id,
+        reviewed_at: new Date().toISOString(),
+      })
+      .eq("id", requestId);
 
-  const { data: household } = await supabase
-    .from("households")
-    .select("address, comuna")
-    .eq("id", request.household_id)
-    .single();
+    if (contactError) return { ok: false, error: contactError.message };
 
-  const { error: visitError } = await supabase.from("visits").insert({
-    household_id: request.household_id,
-    elder_id: elder?.id ?? null,
-    professional_id: professionalId,
-    discipline: request.discipline,
-    scheduled_at: scheduledAt.toISOString(),
-    duration_min: 60,
-    status: "confirmed",
-    address: household?.address ?? household?.comuna ?? "Puerto Montt",
-    created_by: profile.id,
-  });
+    invalidateVisitData();
+    revalidatePath("/tablero");
+    revalidatePath("/solicitudes-coordinacion");
+    revalidatePath("/inicio");
+    return { ok: true };
+  }
 
-  if (visitError) {
-    return { ok: false, error: visitError.message };
+  if (!professionalId || !scheduledAtInput || !scheduledAt) {
+    return { ok: false, error: "Selecciona profesional y horario." };
+  }
+
+  if (request.type === "change") {
+    if (!request.visit_id) {
+      return { ok: false, error: "La solicitud no tiene una visita vinculada." };
+    }
+
+    const { error: changeError } = await supabase
+      .from("visits")
+      .update({
+        professional_id: professionalId,
+        scheduled_at: scheduledAt.toISOString(),
+        status: "confirmed",
+        cancellation_reason: null,
+      })
+      .eq("id", request.visit_id)
+      .eq("household_id", request.household_id);
+
+    if (changeError) return { ok: false, error: changeError.message };
+  } else {
+    const { data: elder } = await supabase
+      .from("elders")
+      .select("id")
+      .eq("household_id", request.household_id)
+      .limit(1)
+      .maybeSingle();
+
+    const { data: household } = await supabase
+      .from("households")
+      .select("address, comuna")
+      .eq("id", request.household_id)
+      .single();
+
+    const { error: visitError } = await supabase.from("visits").insert({
+      household_id: request.household_id,
+      elder_id: elder?.id ?? null,
+      professional_id: professionalId,
+      discipline: request.discipline,
+      scheduled_at: scheduledAt.toISOString(),
+      duration_min: 60,
+      status: "confirmed",
+      address: household?.address ?? household?.comuna ?? "Puerto Montt",
+      created_by: profile.id,
+    });
+
+    if (visitError) {
+      return { ok: false, error: visitError.message };
+    }
   }
 
   const { error: updateError } = await supabase
@@ -253,7 +315,7 @@ export async function cancelVisit(formData: FormData) {
     .from("visits")
     .update({
       status: "cancelled",
-      cancellation_reason: reason || "Cancelada por coordinaci?n.",
+      cancellation_reason: reason || "Cancelada por coordinación.",
     })
     .eq("id", visitId);
 

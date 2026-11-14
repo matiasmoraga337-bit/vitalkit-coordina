@@ -1,9 +1,10 @@
-import { Receipt, Wallet } from "lucide-react";
+import Link from "next/link";
+import { MessageCircle, Receipt } from "lucide-react";
 import { cacheLife, cacheTag } from "next/cache";
 import { EmptyState } from "@/components/app/empty-state";
 import { PageHeader } from "@/components/app/page-header";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -15,6 +16,7 @@ import { Separator } from "@/components/ui/separator";
 import { requireRole } from "@/lib/auth";
 import { getFamilyInvoicesCached } from "@/lib/data/family";
 import { formatCLP } from "@/lib/format";
+import { cn } from "@/lib/utils";
 
 export const instant = false;
 
@@ -77,10 +79,18 @@ export default async function FamilyInvoicePage() {
                     <p>Emitida: {invoice.issuedAt}</p>
                     <p>Vencimiento: {invoice.dueAt ?? "Sin fecha"}</p>
                   </div>
-                  <Button variant="outline" className="w-full" disabled>
-                    <Wallet className="size-4" />
-                    Pago en línea disponible en la siguiente etapa
-                  </Button>
+                  <div className="flex flex-col gap-2">
+                    <Link
+                      href="/mensajes"
+                      className={cn(buttonVariants({ variant: "outline" }), "w-full")}
+                    >
+                      <MessageCircle className="size-4" />
+                      ¿Dudas con tu factura? Hablar con coordinación
+                    </Link>
+                    <p className="text-center text-xs text-muted-foreground">
+                      El pago en línea se habilitará en la siguiente etapa.
+                    </p>
+                  </div>
                 </CardContent>
               </Card>
             ))}
