@@ -69,6 +69,46 @@ export type FamilyDashboard = {
   };
 };
 
+type NestedHousehold = {
+  id: string;
+  name: string;
+  comuna: string;
+  address: string | null;
+  plan_id: string | null;
+  plans: {
+    id: string;
+    name: string;
+    price_clp: number;
+    visits: Record<string, number> | null;
+  } | null;
+  coordinator: { full_name: string } | null;
+  elders: Array<{
+    id: string;
+    full_name: string;
+    birth_date: string | null;
+  }>;
+  subscriptions: Array<{ start_date: string; status: string }>;
+  care_plans: Array<{
+    goals: string[] | null;
+    frequency: string | null;
+    recommendations: string[] | null;
+    next_review: string | null;
+    created_at: string;
+  }>;
+};
+
+type NestedVisit = {
+  id: string;
+  discipline: Discipline;
+  scheduled_at: string;
+  status: VisitStatus;
+  professionals: {
+    discipline: Discipline | null;
+    profiles: { full_name: string } | null;
+  } | null;
+  visit_reports: { summary: string } | null;
+};
+
 export async function getFamilyDashboard(
   supabase: Client,
   profileId: string,
@@ -76,122 +116,59 @@ export async function getFamilyDashboard(
 ): Promise<FamilyDashboard | null> {
   const { data: membership } = await supabase
     .from("household_members")
-    .select("household_id")
+    .select(
+      "household_id, households(*, plans(*), coordinator:profiles!households_coordinator_id_fkey(full_name), elders(*), subscriptions(*), care_plans(*))",
+    )
     .eq("profile_id", profileId)
     .limit(1)
     .maybeSingle();
 
-  if (!membership) return null;
+  if (!membership?.households) return null;
 
-  const { data: household, error: householdError } = await supabase
-    .from("households")
-    .select("*")
-    .eq("id", membership.household_id)
-    .single();
+  const household = membership.households as unknown as NestedHousehold;
 
-  if (householdError || !household) return null;
+  const [visitsResult, requestsResult] = await Promise.all([
+    supabase
+      .from("visits")
+      .select(
+        "*, professionals!visits_professional_id_fkey(id, discipline, profiles!professionals_id_fkey(full_name)), visit_reports(*)",
+      )
+      .eq("household_id", household.id)
+      .order("scheduled_at", { ascending: true }),
+    supabase
+      .from("requests")
+      .select("*")
+      .eq("household_id", household.id)
+      .order("created_at", { ascending: false }),
+  ]);
 
-  const [planResult, coordinatorResult, elderResult, subscriptionResult, visitsResult, carePlanResult, requestsResult] =
-    await Promise.all([
-      household.plan_id
-        ? supabase.from("plans").select("*").eq("id", household.plan_id).single()
-        : Promise.resolve({ data: null, error: null }),
-      household.coordinator_id
-        ? supabase
-            .from("profiles")
-            .select("full_name")
-            .eq("id", household.coordinator_id)
-            .single()
-        : Promise.resolve({ data: null, error: null }),
-      supabase
-        .from("elders")
-        .select("*")
-        .eq("household_id", household.id)
-        .order("created_at", { ascending: true })
-        .limit(1)
-        .maybeSingle(),
-      supabase
-        .from("subscriptions")
-        .select("*")
-        .eq("household_id", household.id)
-        .order("start_date", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
-      supabase
-        .from("visits")
-        .select("*")
-        .eq("household_id", household.id)
-        .order("scheduled_at", { ascending: true }),
-      supabase
-        .from("care_plans")
-        .select("*")
-        .eq("household_id", household.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
-      supabase
-        .from("requests")
-        .select("*")
-        .eq("household_id", household.id)
-        .order("created_at", { ascending: false }),
-    ]);
-
-  const plan = planResult.data;
-  const coordinator = coordinatorResult.data;
-  const elder = elderResult.data;
-  const subscription = subscriptionResult.data;
-  const visits = visitsResult.data ?? [];
-  const carePlan = carePlanResult.data;
+  const visits = (visitsResult.data ?? []) as unknown as NestedVisit[];
   const requests = requestsResult.data ?? [];
 
-  const professionalIds = [
-    ...new Set(visits.map((visit) => visit.professional_id).filter(Boolean)),
-  ] as string[];
-
-  const completedVisitIds = visits
-    .filter((visit) => visit.status === "completed")
-    .map((visit) => visit.id);
-
-  const [professionalProfilesResult, professionalDisciplinesResult, reportsResult] =
-    await Promise.all([
-      professionalIds.length
-        ? supabase.from("profiles").select("id, full_name").in("id", professionalIds)
-        : Promise.resolve({ data: [], error: null }),
-      professionalIds.length
-        ? supabase.from("professionals").select("id, discipline").in("id", professionalIds)
-        : Promise.resolve({ data: [], error: null }),
-      completedVisitIds.length
-        ? supabase
-            .from("visit_reports")
-            .select("*")
-            .in("visit_id", completedVisitIds)
-        : Promise.resolve({ data: [], error: null }),
-    ]);
-
-  const professionalNames = new Map(
-    (professionalProfilesResult.data ?? []).map((item) => [item.id, item.full_name]),
-  );
-  const professionalDisciplines = new Map(
-    (professionalDisciplinesResult.data ?? []).map((item) => [item.id, item.discipline]),
-  );
-  const reportsByVisit = new Map(
-    (reportsResult.data ?? []).map((report) => [report.visit_id, report]),
-  );
+  const elder = [...(household.elders ?? [])].sort((a, b) =>
+    a.full_name.localeCompare(b.full_name),
+  )[0];
+  const subscription = [...(household.subscriptions ?? [])].sort((a, b) =>
+    b.start_date.localeCompare(a.start_date),
+  )[0];
+  const carePlan = [...(household.care_plans ?? [])].sort((a, b) =>
+    b.created_at.localeCompare(a.created_at),
+  )[0];
+  const plan = household.plans;
 
   const mappedVisits: FamilyVisit[] = visits.map((visit) => {
-    const discipline = (professionalDisciplines.get(visit.professional_id ?? "") ??
+    const discipline = (visit.professionals?.discipline ??
       visit.discipline) as Discipline;
-    const report = reportsByVisit.get(visit.id);
-
     return {
       id: visit.id,
       discipline,
-      professional: professionalNames.get(visit.professional_id ?? "") ?? "Profesional asignado",
+      professional:
+        visit.professionals?.profiles?.full_name ?? "Profesional asignado",
       professionalRole: professionalRole[discipline],
       date: formatVisitDate(visit.scheduled_at),
       time: formatVisitTime(visit.scheduled_at),
-      status: visit.status as VisitStatus,
-      note: report?.summary,
+      status: visit.status,
+      note: visit.visit_reports?.summary,
     };
   });
 
@@ -207,7 +184,7 @@ export async function getFamilyDashboard(
 
   const now = new Date();
   const planVisits = plan?.visits
-    ? Object.values(plan.visits as Record<string, number>).reduce(
+    ? Object.values(plan.visits).reduce(
         (total, value) => total + Number(value ?? 0),
         0,
       )
@@ -231,7 +208,7 @@ export async function getFamilyDashboard(
       comuna: household.comuna,
       plan: plan?.name ?? "Sin plan",
       planPrice: plan?.price_clp ?? 0,
-      coordinator: coordinator?.full_name ?? "Sin coordinador",
+      coordinator: household.coordinator?.full_name ?? "Sin coordinador",
       startDate: subscription?.start_date ?? "",
       address: household.address ?? household.comuna,
     },
@@ -242,7 +219,9 @@ export async function getFamilyDashboard(
           goals: carePlan.goals ?? [],
           frequency: carePlan.frequency ?? "",
           recommendations: carePlan.recommendations ?? [],
-          nextReview: carePlan.next_review ? formatVisitDate(carePlan.next_review) : "",
+          nextReview: carePlan.next_review
+            ? formatVisitDate(carePlan.next_review)
+            : "",
         }
       : null,
     stats: {
@@ -252,7 +231,8 @@ export async function getFamilyDashboard(
           new Date(visit.scheduled_at) >= now &&
           (visit.status === "scheduled" || visit.status === "confirmed"),
       ).length,
-      pendingRequests: requests.filter((request) => request.status === "pending").length,
+      pendingRequests: requests.filter((request) => request.status === "pending")
+        .length,
       planVisits,
     },
   };
