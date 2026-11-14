@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { flushSync } from "react-dom";
 import { CheckCheck, Loader2, MessageCircle, Send } from "lucide-react";
 import { toast } from "sonner";
@@ -23,6 +24,7 @@ export function MessageThreadView({
   const [unreadCount, setUnreadCount] = useState(thread.unreadCount);
   const [draft, setDraft] = useState("");
   const [pending, startTransition] = useTransition();
+  const router = useRouter();
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -67,6 +69,7 @@ export function MessageThreadView({
       }
 
       toast.success("Mensaje enviado.");
+      router.refresh();
     });
   }
 

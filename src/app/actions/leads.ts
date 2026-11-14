@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth";
@@ -79,6 +79,7 @@ export async function createLead(
     return { ok: false, error: "No pudimos enviar la solicitud. Intenta nuevamente." };
   }
 
+  updateTag("leads");
   revalidatePath("/leads");
   return { ok: true };
 }
@@ -97,5 +98,6 @@ export async function updateLeadStatus(formData: FormData) {
     .update({ status: status as "new" | "contacted" | "converted" | "discarded" })
     .eq("id", leadId);
 
+  updateTag("leads");
   revalidatePath("/leads");
 }

@@ -1,17 +1,22 @@
 import Link from "next/link";
+import { cacheLife, cacheTag } from "next/cache";
 import { ArrowRight, Inbox, Users } from "lucide-react";
 import { EmptyState } from "@/components/app/empty-state";
 import { PageHeader } from "@/components/app/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { requireRole } from "@/lib/auth";
-import { getCoordinatorCases } from "@/lib/data/coordinator";
+import { getCoordinatorCasesCached } from "@/lib/data/coordinator";
 
 export const instant = false;
 
 export default async function CoordinatorCasesPage() {
-  const { supabase } = await requireRole("coordinator");
-  const cases = await getCoordinatorCases(supabase);
+  "use cache: private";
+  cacheLife({ stale: 300, revalidate: 60, expire: 600 });
+  cacheTag("coordinator-cases");
+
+  await requireRole("coordinator");
+  const cases = await getCoordinatorCasesCached();
 
   return (
     <>

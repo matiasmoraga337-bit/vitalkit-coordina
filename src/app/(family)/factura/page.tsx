@@ -1,4 +1,5 @@
 import { Receipt, Wallet } from "lucide-react";
+import { cacheLife, cacheTag } from "next/cache";
 import { EmptyState } from "@/components/app/empty-state";
 import { PageHeader } from "@/components/app/page-header";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { requireRole } from "@/lib/auth";
-import { getFamilyInvoices } from "@/lib/data/family";
+import { getFamilyInvoicesCached } from "@/lib/data/family";
 import { formatCLP } from "@/lib/format";
 
 export const instant = false;
@@ -24,8 +25,12 @@ const statusLabel: Record<string, string> = {
 };
 
 export default async function FamilyInvoicePage() {
-  const { supabase, profile } = await requireRole("family");
-  const invoices = await getFamilyInvoices(supabase, profile.id);
+  "use cache: private";
+  cacheLife({ stale: 300, revalidate: 60, expire: 600 });
+  cacheTag("family-invoices");
+
+  const { profile } = await requireRole("family");
+  const invoices = await getFamilyInvoicesCached(profile.id);
 
   return (
     <>

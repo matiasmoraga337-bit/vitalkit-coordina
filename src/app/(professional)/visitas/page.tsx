@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cacheLife, cacheTag } from "next/cache";
 import { ArrowRight, ClipboardCheck } from "lucide-react";
 import { EmptyState } from "@/components/app/empty-state";
 import { PageHeader } from "@/components/app/page-header";
@@ -6,15 +7,19 @@ import { VisitStatusBadge } from "@/components/app/status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { requireRole } from "@/lib/auth";
-import { getProfessionalAgenda } from "@/lib/data/professional";
+import { getProfessionalAgendaCached } from "@/lib/data/professional";
 import { disciplineMeta } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
 export const instant = false;
 
 export default async function ProfessionalVisitsPage() {
-  const { supabase, profile } = await requireRole("professional");
-  const data = await getProfessionalAgenda(supabase, profile.id);
+  "use cache: private";
+  cacheLife({ stale: 300, revalidate: 60, expire: 600 });
+  cacheTag("professional-agenda");
+
+  const { profile } = await requireRole("professional");
+  const data = await getProfessionalAgendaCached(profile.id);
   const completed = data.visits.filter((visit) => visit.status === "completed");
   const active = data.visits.filter((visit) => visit.status !== "completed");
 

@@ -1,4 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { cacheLife, cacheTag } from "next/cache";
+import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/database.types";
 import type { Discipline, RequestStatus, VisitStatus } from "@/lib/mock-data";
 import { formatRelativeDate, formatVisitDate, formatVisitTime } from "@/lib/format";
@@ -267,4 +269,36 @@ export async function getCoordinatorAvailability(supabase: Client) {
     .order("weekday", { ascending: true });
 
   return data ?? [];
+}
+
+export async function getCoordinatorDashboardCached() {
+  "use cache: private";
+  cacheLife({ stale: 300, revalidate: 60, expire: 600 });
+  cacheTag("coordinator-dashboard");
+  const supabase = await createClient();
+  return getCoordinatorDashboard(supabase);
+}
+
+export async function getCoordinatorCaseCached(householdId: string) {
+  "use cache: private";
+  cacheLife({ stale: 300, revalidate: 60, expire: 600 });
+  cacheTag("coordinator-case");
+  const supabase = await createClient();
+  return getCoordinatorCase(supabase, householdId);
+}
+
+export async function getCoordinatorAvailabilityCached() {
+  "use cache: private";
+  cacheLife({ stale: 300, revalidate: 60, expire: 600 });
+  cacheTag("coordinator-availability");
+  const supabase = await createClient();
+  return getCoordinatorAvailability(supabase);
+}
+
+export async function getCoordinatorCasesCached() {
+  "use cache: private";
+  cacheLife({ stale: 300, revalidate: 60, expire: 600 });
+  cacheTag("coordinator-cases");
+  const supabase = await createClient();
+  return getCoordinatorCases(supabase);
 }

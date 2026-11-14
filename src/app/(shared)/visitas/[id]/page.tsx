@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cacheLife, cacheTag } from "next/cache";
 import { notFound } from "next/navigation";
 import {
   AlertTriangle,
@@ -27,7 +28,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { requireRole } from "@/lib/auth";
 import { roleHome } from "@/lib/auth/roles";
-import { getVisitDetail } from "@/lib/data/visit";
+import { getVisitDetailCached } from "@/lib/data/visit";
 import { formatVisitDate, formatVisitTime } from "@/lib/format";
 import { disciplineMeta } from "@/lib/mock-data";
 import { cancelVisit, reassignVisit } from "@/app/actions/visits";
@@ -42,14 +43,18 @@ export default async function VisitDetailPage({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ error?: string; ok?: string }>;
 }) {
+  "use cache: private";
+  cacheLife({ stale: 300, revalidate: 60, expire: 600 });
+  cacheTag("visit-detail");
+
   const { id } = await params;
   const { error, ok } = await searchParams;
-  const { supabase, profile } = await requireRole([
+  const { profile } = await requireRole([
     "family",
     "coordinator",
     "professional",
   ]);
-  const data = await getVisitDetail(supabase, id, profile.role);
+  const data = await getVisitDetailCached(id, profile.role);
 
   if (!data) notFound();
 

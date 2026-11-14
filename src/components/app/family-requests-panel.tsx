@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { flushSync } from "react-dom";
 import { Inbox, Loader2, Send } from "lucide-react";
 import { toast } from "sonner";
@@ -29,6 +30,7 @@ export function FamilyRequestsPanel({
 }) {
   const [requests, setRequests] = useState(initialRequests);
   const [pending, startTransition] = useTransition();
+  const router = useRouter();
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -70,6 +72,7 @@ export function FamilyRequestsPanel({
       }
 
       toast.success("Solicitud enviada.");
+      router.refresh();
     });
   }
 

@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { requireRole } from "@/lib/auth";
 
 export async function updateAvailability(formData: FormData) {
@@ -22,6 +22,8 @@ export async function updateAvailability(formData: FormData) {
     return { ok: false, error: error.message };
   }
 
+  updateTag("professional-availability");
+  updateTag("coordinator-availability");
   revalidatePath("/disponibilidad");
   revalidatePath("/profesionales");
   return { ok: true };

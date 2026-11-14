@@ -1,4 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { cacheLife, cacheTag } from "next/cache";
+import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/database.types";
 import type { AppRole } from "@/lib/auth/roles";
 
@@ -97,4 +99,12 @@ export async function getVisitDetail(
     carePlan: carePlanResult.data ?? null,
     professionals,
   };
+}
+
+export async function getVisitDetailCached(visitId: string, role: AppRole) {
+  "use cache: private";
+  cacheLife({ stale: 300, revalidate: 60, expire: 600 });
+  cacheTag("visit-detail");
+  const supabase = await createClient();
+  return getVisitDetail(supabase, visitId, role);
 }

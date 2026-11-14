@@ -1,4 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { cacheLife, cacheTag } from "next/cache";
+import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/database.types";
 import type { Discipline, VisitStatus } from "@/lib/mock-data";
 import { formatVisitDate, formatVisitTime } from "@/lib/format";
@@ -135,4 +137,20 @@ export async function getProfessionalAvailability(
     endTime: block.end_time,
     active: block.active,
   }));
+}
+
+export async function getProfessionalAgendaCached(professionalId: string) {
+  "use cache: private";
+  cacheLife({ stale: 300, revalidate: 60, expire: 600 });
+  cacheTag("professional-agenda");
+  const supabase = await createClient();
+  return getProfessionalAgenda(supabase, professionalId);
+}
+
+export async function getProfessionalAvailabilityCached(professionalId: string) {
+  "use cache: private";
+  cacheLife({ stale: 300, revalidate: 60, expire: 600 });
+  cacheTag("professional-availability");
+  const supabase = await createClient();
+  return getProfessionalAvailability(supabase, professionalId);
 }

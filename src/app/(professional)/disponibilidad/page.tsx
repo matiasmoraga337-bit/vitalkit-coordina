@@ -1,4 +1,5 @@
 import { Clock3 } from "lucide-react";
+import { cacheLife, cacheTag } from "next/cache";
 import { AvailabilityForm } from "@/components/app/availability-form";
 import { PageHeader } from "@/components/app/page-header";
 import {
@@ -9,13 +10,17 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { requireRole } from "@/lib/auth";
-import { getProfessionalAvailability } from "@/lib/data/professional";
+import { getProfessionalAvailabilityCached } from "@/lib/data/professional";
 
 export const instant = false;
 
 export default async function ProfessionalAvailabilityPage() {
-  const { supabase, profile } = await requireRole("professional");
-  const blocks = await getProfessionalAvailability(supabase, profile.id);
+  "use cache: private";
+  cacheLife({ stale: 300, revalidate: 60, expire: 600 });
+  cacheTag("professional-availability");
+
+  const { profile } = await requireRole("professional");
+  const blocks = await getProfessionalAvailabilityCached(profile.id);
 
   return (
     <div className="space-y-6">

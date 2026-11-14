@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/auth";
 
@@ -39,6 +39,10 @@ export async function createIncident(formData: FormData) {
     redirect(`/visitas/${visitId}?error=${encodeURIComponent(error.message)}`);
   }
 
+  updateTag("visit-detail");
+  updateTag("coordinator-dashboard");
+  updateTag("coordinator-case");
+  revalidatePath("/tablero");
   revalidatePath(`/visitas/${visitId}`);
   revalidatePath("/tablero");
   redirect(`/visitas/${visitId}?ok=Incidencia%20registrada.`);
@@ -60,6 +64,9 @@ export async function resolveIncident(formData: FormData) {
     redirect(`/visitas/${visitId}?error=${encodeURIComponent(error.message)}`);
   }
 
+  updateTag("visit-detail");
+  updateTag("coordinator-dashboard");
+  updateTag("coordinator-case");
   revalidatePath(`/visitas/${visitId}`);
   revalidatePath("/tablero");
   redirect(`/visitas/${visitId}?ok=Incidencia%20resuelta.`);

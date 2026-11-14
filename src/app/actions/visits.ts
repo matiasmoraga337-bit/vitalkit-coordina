@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/auth";
 import type { Database } from "@/lib/supabase/database.types";
@@ -9,6 +9,15 @@ type Discipline = Database["public"]["Enums"]["discipline"];
 
 const disciplines = new Set(["kinesiologia", "nutricion", "enfermeria", "aseo"]);
 const requestTypes = new Set(["extra_visit", "change", "contact"]);
+
+function invalidateVisitData() {
+  updateTag("family-dashboard");
+  updateTag("coordinator-dashboard");
+  updateTag("coordinator-cases");
+  updateTag("coordinator-case");
+  updateTag("professional-agenda");
+  updateTag("visit-detail");
+}
 
 function parseDiscipline(value: FormDataEntryValue | null): Discipline | null {
   const discipline = String(value ?? "");
@@ -54,6 +63,7 @@ export async function createRequest(formData: FormData) {
     return { ok: false, error: error.message };
   }
 
+  invalidateVisitData();
   revalidatePath("/inicio");
   revalidatePath("/tablero");
   return { ok: true };
@@ -126,6 +136,7 @@ export async function approveRequest(formData: FormData) {
     return { ok: false, error: updateError.message };
   }
 
+  invalidateVisitData();
   revalidatePath("/tablero");
   revalidatePath("/inicio");
   revalidatePath("/agenda");
@@ -148,6 +159,7 @@ export async function startVisit(formData: FormData) {
     return { ok: false, error: error.message };
   }
 
+  invalidateVisitData();
   revalidatePath("/agenda");
   revalidatePath("/inicio");
   return { ok: true };
@@ -183,6 +195,7 @@ export async function completeVisit(formData: FormData) {
   }
 
   revalidatePath("/agenda");
+  invalidateVisitData();
   revalidatePath("/inicio");
   revalidatePath("/tablero");
   return { ok: true };
@@ -221,6 +234,7 @@ export async function reassignVisit(formData: FormData) {
     redirect(`/visitas/${visitId}?error=${encodeURIComponent(error.message)}`);
   }
 
+  invalidateVisitData();
   revalidatePath("/tablero");
   revalidatePath("/inicio");
   revalidatePath("/agenda");
@@ -247,6 +261,7 @@ export async function cancelVisit(formData: FormData) {
     redirect(`/visitas/${visitId}?error=${encodeURIComponent(error.message)}`);
   }
 
+  invalidateVisitData();
   revalidatePath("/tablero");
   revalidatePath("/inicio");
   revalidatePath("/agenda");

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cacheLife, cacheTag } from "next/cache";
 import {
   AlertCircle,
   ArrowRight,
@@ -10,7 +11,7 @@ import {
   Users,
 } from "lucide-react";
 import { requireRole } from "@/lib/auth";
-import { getCoordinatorDashboard } from "@/lib/data/coordinator";
+import { getCoordinatorDashboardCached } from "@/lib/data/coordinator";
 import { VisitStatusBadge } from "@/components/app/status-badge";
 import { CoordinatorPendingRequests } from "@/components/app/coordinator-pending-requests";
 import { Badge } from "@/components/ui/badge";
@@ -28,8 +29,12 @@ import { cn } from "@/lib/utils";
 export const instant = false;
 
 export default async function CoordinatorDashboardPage() {
-  const { supabase } = await requireRole("coordinator");
-  const data = await getCoordinatorDashboard(supabase);
+  "use cache: private";
+  cacheLife({ stale: 300, revalidate: 60, expire: 600 });
+  cacheTag("coordinator-dashboard");
+
+  await requireRole("coordinator");
+  const data = await getCoordinatorDashboardCached();
   const pendingRequests = data.requests.filter((request) => request.status === "pending");
   return (
     <>

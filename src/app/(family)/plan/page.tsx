@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cacheLife, cacheTag } from "next/cache";
 import { ClipboardList, MessageCircle, Target } from "lucide-react";
 import { EmptyState } from "@/components/app/empty-state";
 import { PageHeader } from "@/components/app/page-header";
@@ -12,14 +13,18 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { requireRole } from "@/lib/auth";
-import { getFamilyDashboard } from "@/lib/data/family";
+import { getFamilyDashboardCached } from "@/lib/data/family";
 import { cn } from "@/lib/utils";
 
 export const instant = false;
 
 export default async function FamilyCarePlanPage() {
-  const { supabase, profile } = await requireRole("family");
-  const data = await getFamilyDashboard(supabase, profile.id, profile.full_name);
+  "use cache: private";
+  cacheLife({ stale: 300, revalidate: 60, expire: 600 });
+  cacheTag("family-dashboard");
+
+  const { profile } = await requireRole("family");
+  const data = await getFamilyDashboardCached(profile.id, profile.full_name);
 
   if (!data) {
     return (

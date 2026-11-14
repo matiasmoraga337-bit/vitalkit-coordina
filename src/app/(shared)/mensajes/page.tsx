@@ -1,27 +1,26 @@
 import Link from "next/link";
+import { cacheLife, cacheTag } from "next/cache";
 import { ArrowRight, Inbox, MessageCircle } from "lucide-react";
 import { EmptyState } from "@/components/app/empty-state";
-import { FeedbackBanner } from "@/components/app/feedback-banner";
 import { MessageThreadView } from "@/components/app/message-thread";
 import { PageHeader } from "@/components/app/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { requireRole } from "@/lib/auth";
-import { getCoordinatorThreads, getFamilyThread } from "@/lib/data/messages";
+import { getCoordinatorThreadsCached, getFamilyThreadCached } from "@/lib/data/messages";
 import { formatRelativeDate } from "@/lib/format";
 
 export const instant = false;
 
-export default async function MessagesPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ error?: string; ok?: string }>;
-}) {
-  const { error, ok } = await searchParams;
-  const { supabase, user, profile } = await requireRole(["family", "coordinator"]);
+export default async function MessagesPage() {
+  "use cache: private";
+  cacheLife({ stale: 300, revalidate: 60, expire: 600 });
+  cacheTag("messages");
+
+  const { user, profile } = await requireRole(["family", "coordinator"]);
 
   if (profile.role === "family") {
-    const thread = await getFamilyThread(supabase, profile.id, user.id);
+    const thread = await getFamilyThreadCached(profile.id, user.id);
     return (
       <>
         <div className="space-y-6">
@@ -31,7 +30,6 @@ export default async function MessagesPage({
             description="Un solo canal para cambios, dudas y seguimiento."
             backHref="/inicio"
           />
-          <FeedbackBanner error={error} ok={ok} />
           {thread ? (
             <MessageThreadView thread={thread} redirectTo="/mensajes" />
           ) : (
@@ -42,7 +40,7 @@ export default async function MessagesPage({
     );
   }
 
-  const threads = await getCoordinatorThreads(supabase, user.id);
+  const threads = await getCoordinatorThreadsCached(user.id);
 
   return (
     <>
@@ -54,7 +52,6 @@ export default async function MessagesPage({
           backHref="/tablero"
           actions={<Badge variant="outline" className="rounded-full">{threads.length} hogares</Badge>}
         />
-        <FeedbackBanner error={error} ok={ok} />
         <div className="grid gap-3">
           {threads.map((thread) => (
             <Link key={thread.householdId} href={`/mensajes/${thread.householdId}`} className="group">

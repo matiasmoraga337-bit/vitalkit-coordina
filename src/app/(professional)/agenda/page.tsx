@@ -5,9 +5,10 @@ import {
   MapPin,
   Navigation,
 } from "lucide-react";
+import { cacheLife, cacheTag } from "next/cache";
 import { requireRole } from "@/lib/auth";
 import { ProfessionalVisitActions } from "@/components/app/professional-visit-actions";
-import { getProfessionalAgenda } from "@/lib/data/professional";
+import { getProfessionalAgendaCached } from "@/lib/data/professional";
 import { VisitStatusBadge } from "@/components/app/status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -25,8 +26,12 @@ import { cn } from "@/lib/utils";
 export const instant = false;
 
 export default async function ProfessionalAgendaPage() {
-  const { supabase, profile } = await requireRole("professional");
-  const data = await getProfessionalAgenda(supabase, profile.id);
+  "use cache: private";
+  cacheLife({ stale: 300, revalidate: 60, expire: 600 });
+  cacheTag("professional-agenda");
+
+  const { profile } = await requireRole("professional");
+  const data = await getProfessionalAgendaCached(profile.id);
   const currentVisit = data.currentVisit ?? {
     id: "empty",
     household: "Sin visitas",

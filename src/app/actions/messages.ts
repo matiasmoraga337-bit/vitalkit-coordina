@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { requireRole } from "@/lib/auth";
 
 export async function sendMessage(formData: FormData) {
@@ -21,6 +21,7 @@ export async function sendMessage(formData: FormData) {
     return { ok: false, error: error.message };
   }
 
+  updateTag("messages");
   revalidatePath("/mensajes");
   revalidatePath(`/mensajes/${householdId}`);
   revalidatePath("/inicio");
@@ -46,6 +47,7 @@ export async function markMessagesRead(formData: FormData) {
     return { ok: false, error: error.message };
   }
 
+  updateTag("messages");
   revalidatePath(redirectTo);
   return { ok: true };
 }

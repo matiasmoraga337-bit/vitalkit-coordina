@@ -1,4 +1,5 @@
 import { Inbox } from "lucide-react";
+import { cacheLife, cacheTag } from "next/cache";
 import { FeedbackBanner } from "@/components/app/feedback-banner";
 import { PageHeader } from "@/components/app/page-header";
 import { RequestStatusBadge } from "@/components/app/status-badge";
@@ -11,7 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { requireRole } from "@/lib/auth";
-import { getCoordinatorDashboard } from "@/lib/data/coordinator";
+import { getCoordinatorDashboardCached } from "@/lib/data/coordinator";
 import { disciplineMeta } from "@/lib/mock-data";
 
 export const instant = false;
@@ -27,9 +28,13 @@ export default async function CoordinatorRequestsPage({
 }: {
   searchParams: Promise<{ error?: string; ok?: string }>;
 }) {
+  "use cache: private";
+  cacheLife({ stale: 300, revalidate: 60, expire: 600 });
+  cacheTag("coordinator-dashboard");
+
   const { error, ok } = await searchParams;
-  const { supabase } = await requireRole("coordinator");
-  const data = await getCoordinatorDashboard(supabase);
+  await requireRole("coordinator");
+  const data = await getCoordinatorDashboardCached();
   const pending = data.requests.filter((request) => request.status === "pending");
   const others = data.requests.filter((request) => request.status !== "pending");
 

@@ -1,4 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { cacheLife, cacheTag } from "next/cache";
+import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/database.types";
 import type { Discipline, RequestStatus, VisitStatus } from "@/lib/mock-data";
 import {
@@ -296,4 +298,23 @@ export async function getFamilyInvoices(
     issuedAt: invoice.issued_at,
     dueAt: invoice.due_at,
   }));
+}
+
+export async function getFamilyDashboardCached(
+  profileId: string,
+  contactName: string,
+) {
+  "use cache: private";
+  cacheLife({ stale: 300, revalidate: 60, expire: 600 });
+  cacheTag("family-dashboard");
+  const supabase = await createClient();
+  return getFamilyDashboard(supabase, profileId, contactName);
+}
+
+export async function getFamilyInvoicesCached(profileId: string) {
+  "use cache: private";
+  cacheLife({ stale: 300, revalidate: 60, expire: 600 });
+  cacheTag("family-invoices");
+  const supabase = await createClient();
+  return getFamilyInvoices(supabase, profileId);
 }

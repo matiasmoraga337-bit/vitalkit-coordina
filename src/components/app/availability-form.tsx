@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
@@ -29,6 +30,7 @@ export function AvailabilityForm({
     }),
   );
   const [pending, startTransition] = useTransition();
+  const router = useRouter();
 
   function updateBlock(weekday: number, patch: Partial<(typeof blocks)[number]>) {
     setBlocks((current) =>
@@ -53,6 +55,7 @@ export function AvailabilityForm({
       }
 
       toast.success("Disponibilidad actualizada.");
+      router.refresh();
     });
   }
 

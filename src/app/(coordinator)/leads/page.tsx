@@ -1,11 +1,12 @@
 import { Mail, Phone, UserPlus } from "lucide-react";
+import { cacheLife, cacheTag } from "next/cache";
 import { EmptyState } from "@/components/app/empty-state";
 import { PageHeader } from "@/components/app/page-header";
 import { SubmitButton } from "@/components/app/submit-button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireRole } from "@/lib/auth";
-import { getLeads } from "@/lib/data/leads";
+import { getLeadsCached } from "@/lib/data/leads";
 import { updateLeadStatus } from "@/app/actions/leads";
 import { formatRelativeDate } from "@/lib/format";
 import { planById, type PlanId } from "@/lib/plans";
@@ -28,8 +29,12 @@ const statusClass: Record<string, string> = {
 };
 
 export default async function LeadsPage() {
-  const { supabase } = await requireRole("coordinator");
-  const leads = await getLeads(supabase);
+  "use cache: private";
+  cacheLife({ stale: 300, revalidate: 60, expire: 600 });
+  cacheTag("leads");
+
+  await requireRole("coordinator");
+  const leads = await getLeadsCached();
 
   return (
     <div className="space-y-6">

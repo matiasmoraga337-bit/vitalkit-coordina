@@ -1,19 +1,24 @@
 import Link from "next/link";
+import { cacheLife, cacheTag } from "next/cache";
 import { ArrowRight, CalendarDays } from "lucide-react";
 import { EmptyState } from "@/components/app/empty-state";
 import { PageHeader } from "@/components/app/page-header";
 import { VisitStatusBadge } from "@/components/app/status-badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { requireRole } from "@/lib/auth";
-import { getCoordinatorDashboard } from "@/lib/data/coordinator";
+import { getCoordinatorDashboardCached } from "@/lib/data/coordinator";
 import { disciplineMeta } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
 export const instant = false;
 
 export default async function CoordinatorCalendarPage() {
-  const { supabase } = await requireRole("coordinator");
-  const data = await getCoordinatorDashboard(supabase);
+  "use cache: private";
+  cacheLife({ stale: 300, revalidate: 60, expire: 600 });
+  cacheTag("coordinator-dashboard");
+
+  await requireRole("coordinator");
+  const data = await getCoordinatorDashboardCached();
 
   const groups = new Map<string, typeof data.visits>();
   for (const visit of data.visits) {

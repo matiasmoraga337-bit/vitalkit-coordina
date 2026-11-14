@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cacheLife, cacheTag } from "next/cache";
 import { notFound } from "next/navigation";
 import {
   ArrowRight,
@@ -22,7 +23,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { requireRole } from "@/lib/auth";
-import { getCoordinatorCase } from "@/lib/data/coordinator";
+import { getCoordinatorCaseCached } from "@/lib/data/coordinator";
 import { disciplineMeta } from "@/lib/mock-data";
 import { formatCLP } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -34,9 +35,13 @@ export default async function CoordinatorCasePage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  "use cache: private";
+  cacheLife({ stale: 300, revalidate: 60, expire: 600 });
+  cacheTag("coordinator-case");
+
   const { id } = await params;
-  const { supabase } = await requireRole("coordinator");
-  const data = await getCoordinatorCase(supabase, id);
+  await requireRole("coordinator");
+  const data = await getCoordinatorCaseCached(id);
 
   if (!data) notFound();
 

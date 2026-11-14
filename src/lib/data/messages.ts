@@ -1,4 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { cacheLife, cacheTag } from "next/cache";
+import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/database.types";
 
 type Client = SupabaseClient<Database>;
@@ -166,4 +168,31 @@ export async function getThreadForCoordinator(
       (message) => message.sender_id !== currentUserId && !message.read_at,
     ).length,
   };
+}
+
+export async function getFamilyThreadCached(profileId: string, currentUserId: string) {
+  "use cache: private";
+  cacheLife({ stale: 300, revalidate: 60, expire: 600 });
+  cacheTag("messages");
+  const supabase = await createClient();
+  return getFamilyThread(supabase, profileId, currentUserId);
+}
+
+export async function getCoordinatorThreadsCached(currentUserId: string) {
+  "use cache: private";
+  cacheLife({ stale: 300, revalidate: 60, expire: 600 });
+  cacheTag("messages");
+  const supabase = await createClient();
+  return getCoordinatorThreads(supabase, currentUserId);
+}
+
+export async function getThreadForCoordinatorCached(
+  householdId: string,
+  currentUserId: string,
+) {
+  "use cache: private";
+  cacheLife({ stale: 300, revalidate: 60, expire: 600 });
+  cacheTag("messages");
+  const supabase = await createClient();
+  return getThreadForCoordinator(supabase, householdId, currentUserId);
 }

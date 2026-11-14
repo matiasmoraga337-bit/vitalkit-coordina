@@ -1,4 +1,5 @@
 import { BadgeCheck, MapPin, UserCheck, UserX } from "lucide-react";
+import { cacheLife, cacheTag } from "next/cache";
 import { EmptyState } from "@/components/app/empty-state";
 import { FeedbackBanner } from "@/components/app/feedback-banner";
 import { PageHeader } from "@/components/app/page-header";
@@ -13,8 +14,8 @@ import {
 } from "@/components/ui/card";
 import { requireRole } from "@/lib/auth";
 import {
-  getCoordinatorAvailability,
-  getCoordinatorDashboard,
+  getCoordinatorAvailabilityCached,
+  getCoordinatorDashboardCached,
 } from "@/lib/data/coordinator";
 import { verifyProfessional } from "@/app/actions/professionals";
 import { disciplineMeta } from "@/lib/mock-data";
@@ -29,11 +30,15 @@ export default async function CoordinatorProfessionalsPage({
 }: {
   searchParams: Promise<{ error?: string; ok?: string }>;
 }) {
+  "use cache: private";
+  cacheLife({ stale: 300, revalidate: 60, expire: 600 });
+  cacheTag("coordinator-availability");
+
   const { error, ok } = await searchParams;
-  const { supabase } = await requireRole("coordinator");
+  await requireRole("coordinator");
   const [data, availability] = await Promise.all([
-    getCoordinatorDashboard(supabase),
-    getCoordinatorAvailability(supabase),
+    getCoordinatorDashboardCached(),
+    getCoordinatorAvailabilityCached(),
   ]);
 
   const availabilityByProfessional = new Map<string, typeof availability>();

@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/auth";
 
@@ -24,6 +24,9 @@ export async function verifyProfessional(formData: FormData) {
     redirect(`/profesionales?error=${encodeURIComponent(error.message)}`);
   }
 
+  updateTag("coordinator-dashboard");
+  updateTag("coordinator-availability");
+  updateTag("coordinator-cases");
   revalidatePath("/profesionales");
   revalidatePath("/tablero");
   redirect("/profesionales?ok=Verificaci%C3%B3n%20actualizada.");
