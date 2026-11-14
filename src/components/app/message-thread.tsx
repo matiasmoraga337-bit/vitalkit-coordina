@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition } from "react";
+import { flushSync } from "react-dom";
 import { CheckCheck, Loader2, MessageCircle, Send } from "lucide-react";
 import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -43,8 +44,10 @@ export function MessageThreadView({
       readAt: null,
     };
 
-    setMessages((current) => [...current, optimistic]);
-    setDraft("");
+    flushSync(() => {
+      setMessages((current) => [...current, optimistic]);
+      setDraft("");
+    });
 
     const formData = new FormData();
     formData.set("household_id", thread.householdId);
