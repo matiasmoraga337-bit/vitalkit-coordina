@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, BadgeCheck, CalendarCheck2, HeartHandshake } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
+import { disciplines } from "@/lib/landing-data";
 import { cn } from "@/lib/utils";
 
 const trust = [
@@ -52,34 +53,21 @@ export function LandingHero() {
 
         <div className="relative mx-auto w-full max-w-lg lg:max-w-none">
           <div className="grid grid-cols-2 gap-3 sm:gap-4">
-            <div className="relative col-span-2 aspect-[16/10] overflow-hidden rounded-[2rem] border bg-muted shadow-xl shadow-slate-900/10">
-              <Image
-                src="/landing/kine.webp"
-                alt="Kinesiólogo atendiendo a domicilio"
-                fill
-                priority
-                sizes="(max-width: 1024px) 90vw, 560px"
-                className="object-cover"
-              />
-            </div>
-            <div className="relative aspect-[4/5] overflow-hidden rounded-[1.5rem] border bg-muted">
-              <Image
-                src="/landing/nutri.webp"
-                alt="Nutricionista"
-                fill
-                sizes="(max-width: 1024px) 45vw, 260px"
-                className="object-cover"
-              />
-            </div>
-            <div className="relative aspect-[4/5] overflow-hidden rounded-[1.5rem] border bg-muted">
-              <Image
-                src="/landing/nurse.webp"
-                alt="Enfermera a domicilio"
-                fill
-                sizes="(max-width: 1024px) 45vw, 260px"
-                className="object-cover"
-              />
-            </div>
+            {disciplines.map((discipline, index) => (
+              <div
+                key={discipline.id}
+                className="relative aspect-[4/5] overflow-hidden rounded-[1.5rem] border bg-muted"
+              >
+                <Image
+                  src={discipline.image}
+                  alt={`Profesional de ${discipline.name}`}
+                  fill
+                  priority={index === 0}
+                  sizes="(max-width: 1024px) 45vw, 260px"
+                  className="object-cover"
+                />
+              </div>
+            ))}
           </div>
           <div className="absolute -bottom-4 left-4 rounded-2xl border bg-card/95 px-4 py-3 shadow-lg backdrop-blur sm:left-6">
             <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
