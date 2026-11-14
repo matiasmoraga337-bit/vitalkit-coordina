@@ -14,7 +14,7 @@ PWA de coordinación de cuidado domiciliario para familias de Puerto Montt. Cone
 - [x] Autenticación y selector de rol real
 - [x] Loop: solicitud → asignación → check-in → reporte
 - [x] Calendario, plan de cuidados y factura simulada
-- [x] Flujo familiar redise?ado con wizard y barra inferior
+- [x] Flujo familiar rediseñado con wizard y barra inferior
 - [x] Solicitudes de cambio vinculadas a visitas
 - [x] Casos, profesionales, reasignación y cancelación
 - [x] Incidencias y verificación de profesionales
