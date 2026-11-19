@@ -396,6 +396,7 @@ export type Database = {
       }
       leads: {
         Row: {
+          address: string | null
           comuna: string | null
           consent: boolean
           created_at: string
@@ -412,6 +413,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          address?: string | null
           comuna?: string | null
           consent?: boolean
           created_at?: string
@@ -428,6 +430,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          address?: string | null
           comuna?: string | null
           consent?: boolean
           created_at?: string

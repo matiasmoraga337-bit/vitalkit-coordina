@@ -72,47 +72,74 @@ export default function DemoPage() {
 
       <main className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 sm:py-14">
         <div className="max-w-2xl">
-          <p className="text-sm font-semibold uppercase tracking-wide text-primary">
-            Demo del MVP
-          </p>
-          <h1 className="mt-2 font-heading text-3xl font-bold tracking-tight sm:text-4xl">
-            Elige un rol y prueba el flujo.
+          <h1 className="font-heading text-3xl font-bold tracking-tight sm:text-4xl">
+            Prueba el flujo completo o entra por rol.
           </h1>
           <p className="mt-3 text-sm leading-6 text-muted-foreground sm:text-base">
-            Los datos son de demostración. Cada botón inicia sesión con la cuenta
-            demo del rol y abre su vista.
+            Recorre la compra, la evaluación, el plan, las visitas y el
+            seguimiento. Los datos son ficticios y no se guarda nada.
           </p>
         </div>
 
-        <form action={demoLogin} className="mt-8 grid gap-4 md:grid-cols-3">
-          {demos.map((demo) => {
-            const Icon = demo.icon;
-            return (
-              <Card key={demo.role} className="flex h-full flex-col">
-                <CardHeader>
-                  <span className={cn("grid size-11 place-items-center rounded-xl", demo.accent)}>
-                    <Icon className="size-5" />
-                  </span>
-                  <CardTitle className="mt-3 text-lg">{demo.title}</CardTitle>
-                  <CardDescription className="leading-6">
-                    {demo.description}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="mt-auto">
-                  <button
-                    type="submit"
-                    name="role"
-                    value={demo.role}
-                    className={cn(buttonVariants(), "w-full")}
-                  >
-                    {demo.cta}
-                    <ArrowRight className="size-4" />
-                  </button>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </form>
+        <section className="mt-10 rounded-3xl border bg-muted/20 p-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="max-w-2xl">
+              <h2 className="font-heading text-2xl font-bold tracking-tight">
+                Recorrido completo desde cero
+              </h2>
+              <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                Empieza en la landing, elige un plan, paga, agenda la evaluación,
+                ajusta el plan y entra a la app familiar.
+              </p>
+            </div>
+            <Link
+              href="/demo/flujo-completo"
+              className={cn(buttonVariants({ size: "lg" }))}
+            >
+              Comenzar recorrido
+              <ArrowRight className="size-4" />
+            </Link>
+          </div>
+        </section>
+
+        <section id="roles" className="mt-10 scroll-mt-20">
+          <h2 className="font-heading text-2xl font-bold tracking-tight">
+            Entrar por rol
+          </h2>
+          <p className="mt-1 text-sm leading-6 text-muted-foreground">
+            También puedes abrir una vista específica con una cuenta demo.
+          </p>
+
+          <form action={demoLogin} className="mt-4 grid gap-4 md:grid-cols-3">
+            {demos.map((demo) => {
+              const Icon = demo.icon;
+              return (
+                <Card key={demo.role} className="flex h-full flex-col">
+                  <CardHeader>
+                    <span className={cn("grid size-11 place-items-center rounded-xl", demo.accent)}>
+                      <Icon className="size-5" />
+                    </span>
+                    <CardTitle className="mt-3 text-lg">{demo.title}</CardTitle>
+                    <CardDescription className="leading-6">
+                      {demo.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="mt-auto">
+                    <button
+                      type="submit"
+                      name="role"
+                      value={demo.role}
+                      className={cn(buttonVariants(), "w-full")}
+                    >
+                      {demo.cta}
+                      <ArrowRight className="size-4" />
+                    </button>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </form>
+        </section>
 
         <p className="mt-8 rounded-xl border border-dashed bg-muted/40 p-4 text-xs leading-5 text-muted-foreground">
           Esta demo usa las cuentas seed de Supabase. Para entrar con correo y

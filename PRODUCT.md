@@ -38,6 +38,7 @@ Un solo equipo coordinado, un solo plan, una sola agenda y una sola factura para
 - Flujo de coordinación y flujo profesional con vistas separadas.
 - Checkout público con pago simulado. Se piden **nombre del paciente** y **nombre del familiar o contacto responsable**, además de correo, teléfono y comuna.
 - Decisión delegada para la demo: el checkout **no crea una cuenta real**. Registra la solicitud y el pago simulado; coordinación contacta a la familia para la evaluación inicial. La pantalla de éxito debe mostrar con claridad qué sigue y ofrecer una entrada a la demo.
+- En `/demo/flujo-completo`, el plan de cuidado es una **propuesta inicial editable**: el familiar puede redistribuir el total de visitas del paquete entre disciplinas. El total contratado es el único límite.
 - El pago no debe presentarse como cobro real. No se guardan datos completos de tarjeta; solo los últimos cuatro dígitos.
 - No hay registro público de cuentas ni historial clínico real.
 - El idioma del producto es español.

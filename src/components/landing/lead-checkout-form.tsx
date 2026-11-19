@@ -26,6 +26,7 @@ export function LeadCheckoutForm({ plan }: { plan: Plan }) {
     email: "",
     phone: "",
     comuna: "",
+    address: "",
     message: "",
   });
   const [result, setResult] = useState<CheckoutState>({ ok: false });
@@ -48,6 +49,7 @@ export function LeadCheckoutForm({ plan }: { plan: Plan }) {
     formData.set("email", contact.email);
     formData.set("phone", contact.phone);
     formData.set("comuna", contact.comuna);
+    formData.set("address", contact.address);
     formData.set("message", contact.message);
     formData.set("plan_id", plan.id);
     formData.set("card_last4", input.cardLast4);
@@ -200,6 +202,16 @@ export function LeadCheckoutForm({ plan }: { plan: Plan }) {
                 ))}
               </select>
             </label>
+            <label className="space-y-1 text-xs font-medium sm:col-span-2">
+              Dirección donde se realizarán las visitas
+              <Input
+                value={contact.address}
+                onChange={(event) => updateContact("address", event.target.value)}
+                required
+                autoComplete="street-address"
+                placeholder="Calle, número, depto o casa"
+              />
+            </label>
           </div>
 
           <label className="block space-y-1 text-xs font-medium">
@@ -253,6 +265,9 @@ export function LeadCheckoutForm({ plan }: { plan: Plan }) {
               <p className="font-semibold">{contact.patientName || "Paciente"}</p>
               <p className="truncate text-xs text-muted-foreground">
                 Familiar: {contact.name || "Contacto"} · {contact.comuna || "Comuna"}
+              </p>
+              <p className="truncate text-xs text-muted-foreground">
+                {contact.address || "Dirección de visitas"}
               </p>
               <p className="truncate text-xs text-muted-foreground">
                 {contact.email || "Correo"}

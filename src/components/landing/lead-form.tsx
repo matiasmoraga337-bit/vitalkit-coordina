@@ -101,6 +101,15 @@ export function LeadForm() {
             ))}
           </select>
         </label>
+        <label className="space-y-1 text-xs font-medium sm:col-span-2">
+          Dirección donde se realizarán las visitas
+          <Input
+            name="address"
+            required
+            autoComplete="street-address"
+            placeholder="Calle, número, depto o casa"
+          />
+        </label>
       </div>
 
       <fieldset className="mt-4">

@@ -1,4 +1,4 @@
-import { CreditCard, Mail, Phone, UserPlus } from "lucide-react";
+import { CreditCard, Mail, MapPin, Phone, UserPlus } from "lucide-react";
 import { cacheLife, cacheTag } from "next/cache";
 import { EmptyState } from "@/components/app/empty-state";
 import { PageHeader } from "@/components/app/page-header";
@@ -87,6 +87,12 @@ export default async function LeadsPage() {
                         <Phone className="size-4 text-primary" />
                         {lead.phone}
                       </a>
+                    )}
+                    {lead.address && (
+                      <p className="flex items-start gap-2 sm:col-span-2">
+                        <MapPin className="mt-0.5 size-4 shrink-0 text-primary" />
+                        {lead.address}
+                      </p>
                     )}
                   </div>
                   <div className="flex flex-wrap gap-2 text-xs">
