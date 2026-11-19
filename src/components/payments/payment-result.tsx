@@ -8,6 +8,7 @@ export function PaymentResult({
   reference,
   title,
   description,
+  children,
   actions,
 }: {
   approved: boolean;
@@ -15,6 +16,7 @@ export function PaymentResult({
   reference?: string;
   title?: string;
   description?: string;
+  children?: React.ReactNode;
   actions?: React.ReactNode;
 }) {
   return (
@@ -48,6 +50,7 @@ export function PaymentResult({
           </div>
         )}
       </div>
+      {children && <div className="mt-5 text-left">{children}</div>}
       {actions && <div className="mt-5 flex flex-wrap justify-center gap-2">{actions}</div>}
     </div>
   );

@@ -120,7 +120,7 @@ export function InvoicePaymentButton({
                       href="/plan"
                       className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
                     >
-                      Ver plan
+                      Mi cuidado
                     </Link>
                     <Link
                       href="/mensajes"

@@ -12,11 +12,11 @@ import { LeadForm } from "@/components/landing/lead-form";
 import { LandingFooter } from "@/components/landing/landing-footer";
 
 export const metadata: Metadata = {
-  title: { absolute: "VitalKit ? Cuidado coordinado a domicilio" },
+  title: { absolute: "VitalKit — Cuidado coordinado a domicilio" },
   description:
     "Kinesiología, nutrición, enfermería y aseo coordinados en un solo plan para familias de Puerto Montt.",
   openGraph: {
-    title: "VitalKit ? Cuidado coordinado a domicilio",
+    title: "VitalKit — Cuidado coordinado a domicilio",
     description:
       "Un equipo coordinado, una agenda compartida y una sola factura para el cuidado de tu familia.",
     type: "website",

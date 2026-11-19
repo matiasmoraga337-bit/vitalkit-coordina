@@ -14,6 +14,7 @@ export type LeadFormState = {
 
 const leadSchema = z.object({
   name: z.string().trim().min(2, "Ingresa tu nombre."),
+  patient_name: z.string().trim().min(2, "Ingresa el nombre del paciente."),
   email: z.string().trim().email("Ingresa un correo válido."),
   phone: z.string().trim().max(30).optional(),
   comuna: z.string().trim().max(80).optional(),
@@ -37,6 +38,7 @@ export async function createLead(
 
   const parsed = leadSchema.safeParse({
     name: String(formData.get("name") ?? ""),
+    patient_name: String(formData.get("patient_name") ?? ""),
     email: String(formData.get("email") ?? ""),
     phone: String(formData.get("phone") ?? ""),
     comuna: String(formData.get("comuna") ?? ""),
@@ -66,6 +68,7 @@ export async function createLead(
   const supabase = await createClient();
   const { error } = await supabase.from("leads").insert({
     name: parsed.data.name,
+    patient_name: parsed.data.patient_name,
     email: parsed.data.email,
     phone: parsed.data.phone || null,
     comuna: parsed.data.comuna || null,
@@ -140,6 +143,7 @@ export async function createLeadCheckout(
 
   const parsed = leadSchema.safeParse({
     name: String(formData.get("name") ?? ""),
+    patient_name: String(formData.get("patient_name") ?? ""),
     email: String(formData.get("email") ?? ""),
     phone: String(formData.get("phone") ?? ""),
     comuna: String(formData.get("comuna") ?? ""),
@@ -164,6 +168,7 @@ export async function createLeadCheckout(
   const { error: leadError } = await supabase.from("leads").insert({
     id: leadId,
     name: parsed.data.name,
+    patient_name: parsed.data.patient_name,
     email: parsed.data.email,
     phone: parsed.data.phone || null,
     comuna: parsed.data.comuna || null,

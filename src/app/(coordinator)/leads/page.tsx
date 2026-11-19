@@ -65,7 +65,12 @@ export default async function LeadsPage() {
                 <CardHeader className="flex-row items-start justify-between gap-4">
                   <div>
                     <CardDescription>{formatRelativeDate(lead.created_at)}</CardDescription>
-                    <CardTitle className="text-xl">{lead.name}</CardTitle>
+                    <CardTitle className="text-xl">{lead.patient_name ?? lead.name}</CardTitle>
+                    {lead.patient_name && (
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        Familiar: {lead.name}
+                      </p>
+                    )}
                   </div>
                   <Badge className={cn("rounded-full", statusClass[lead.status])}>
                     {statusLabel[lead.status]}
@@ -100,7 +105,7 @@ export default async function LeadsPage() {
                   {lead.paymentStatus === "approved" && (
                     <p className="text-xs text-muted-foreground">
                       Autorización {lead.paymentReference ?? "SIM-DEMO"}
-                      {lead.paymentAmount ? ` ? ${formatCLP(lead.paymentAmount)}` : ""}
+                      {lead.paymentAmount ? ` · ${formatCLP(lead.paymentAmount)}` : ""}
                     </p>
                   )}
                   {lead.message && (

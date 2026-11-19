@@ -20,10 +20,9 @@ export default async function FamilyRequestsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Solicitudes"
-        title="Pide un cambio o una visita extra"
-        description="La coordinación revisa cada solicitud y confirma el profesional y el horario."
-        backHref="/inicio"
+        title="Solicitudes"
+        description="Pide una visita extra, cambia una visita o revisa lo que ya enviaste."
+        backHref="/plan"
       />
 
       {!data ? (
@@ -34,12 +33,11 @@ export default async function FamilyRequestsPage() {
         />
       ) : (
         <Card>
-          <CardHeader className="flex-row items-start justify-between gap-4">
+          <CardHeader>
             <div>
               <CardDescription>Historial</CardDescription>
               <CardTitle className="text-xl">Tus solicitudes</CardTitle>
             </div>
-            <Inbox className="size-5 text-primary" />
           </CardHeader>
           <CardContent>
             <FamilyRequestsPanel initialRequests={data.requests} />

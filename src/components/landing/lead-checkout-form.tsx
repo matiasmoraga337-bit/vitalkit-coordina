@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 export function LeadCheckoutForm({ plan }: { plan: Plan }) {
   const [step, setStep] = useState(1);
   const [contact, setContact] = useState({
+    patientName: "",
     name: "",
     email: "",
     phone: "",
@@ -43,6 +44,7 @@ export function LeadCheckoutForm({ plan }: { plan: Plan }) {
   ): Promise<SimulatedPaymentResponse> {
     const formData = new FormData();
     formData.set("name", contact.name);
+    formData.set("patient_name", contact.patientName);
     formData.set("email", contact.email);
     formData.set("phone", contact.phone);
     formData.set("comuna", contact.comuna);
@@ -73,26 +75,42 @@ export function LeadCheckoutForm({ plan }: { plan: Plan }) {
 
   if (result.ok) {
     return (
-      <PaymentResult
-        approved
-        amount={plan.price}
-        reference={result.reference}
-        title="Pago simulado aprobado"
-        description="Recibimos tu solicitud y el pago de demostración. Coordinación te contactará para continuar. No se creó una cuenta real ni se realizó un cobro."
-        actions={
-          <>
-            <Link href="/demo" className={cn(buttonVariants({ size: "sm" }))}>
-              Probar demo
-            </Link>
-            <Link href="/login" className={cn(buttonVariants({ variant: "outline", size: "sm" }))}>
-              Ingresar
-            </Link>
-            <Link href="/" className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}>
-              Volver al sitio
-            </Link>
-          </>
-        }
-      />
+      <>
+        <PaymentResult
+          approved
+          amount={plan.price}
+          reference={result.reference}
+          title="Pago simulado aprobado"
+          description="Recibimos tu solicitud y el pago de demostración. Coordinación te contactará para la evaluación inicial. No se creó una cuenta ni se realizó un cobro."
+        >
+          <div className="rounded-2xl border bg-muted/30 p-4">
+            <p className="text-sm font-semibold">Qué sigue</p>
+            <ol className="mt-3 space-y-2.5 text-sm leading-6">
+              {[
+                "Coordinación te contacta para agendar la evaluación inicial.",
+                "Definimos el plan de cuidado según lo que necesita el paciente.",
+                "Agendamos las visitas coordinadas.",
+                "Hacemos seguimiento y ajustamos el plan cuando haga falta.",
+              ].map((step, index) => (
+                <li key={step} className="flex gap-3">
+                  <span className="grid size-6 shrink-0 place-items-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+                    {index + 1}
+                  </span>
+                  {step}
+                </li>
+              ))}
+            </ol>
+          </div>
+        </PaymentResult>
+        <div className="mt-5 flex flex-col gap-2">
+          <Link href="/demo" className={cn(buttonVariants({ size: "lg" }))}>
+            Probar la app demo
+          </Link>
+          <Link href="/" className={cn(buttonVariants({ variant: "ghost" }))}>
+            Volver al sitio
+          </Link>
+        </div>
+      </>
     );
   }
 
@@ -120,23 +138,34 @@ export function LeadCheckoutForm({ plan }: { plan: Plan }) {
               ¿A quién vamos a cuidar?
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Déjanos tus datos y luego simulamos el pago del plan {plan.name}.
+              Déjanos los datos del paciente y de la persona que coordina el cuidado.
+              Luego simulamos el pago del plan {plan.name}.
             </p>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
+            <label className="space-y-1 text-xs font-medium sm:col-span-2">
+              Nombre del paciente
+              <Input
+                value={contact.patientName}
+                onChange={(event) => updateContact("patientName", event.target.value)}
+                required
+                autoComplete="off"
+                placeholder="Nombre de la persona que necesita cuidado"
+              />
+            </label>
             <label className="space-y-1 text-xs font-medium">
-              Nombre
+              Tu nombre (familiar)
               <Input
                 value={contact.name}
                 onChange={(event) => updateContact("name", event.target.value)}
                 required
                 autoComplete="name"
-                placeholder="Tu nombre"
+                placeholder="Quién coordina el cuidado"
               />
             </label>
             <label className="space-y-1 text-xs font-medium">
-              Correo
+              Correo de contacto
               <Input
                 type="email"
                 value={contact.email}
@@ -147,7 +176,7 @@ export function LeadCheckoutForm({ plan }: { plan: Plan }) {
               />
             </label>
             <label className="space-y-1 text-xs font-medium">
-              Teléfono
+              Teléfono de contacto
               <Input
                 type="tel"
                 value={contact.phone}
@@ -163,7 +192,7 @@ export function LeadCheckoutForm({ plan }: { plan: Plan }) {
                 onChange={(event) => updateContact("comuna", event.target.value)}
                 className="h-9 w-full rounded-lg border bg-background px-2.5 text-sm"
               >
-                <option value="">Selecciona tu comuna</option>
+                <option value="">Selecciona la comuna</option>
                 {comunaOptions.map((option) => (
                   <option key={option.value} value={option.label}>
                     {option.label}
@@ -221,9 +250,12 @@ export function LeadCheckoutForm({ plan }: { plan: Plan }) {
               <UserRound className="size-4" />
             </span>
             <div className="min-w-0 text-sm">
-              <p className="font-semibold">{contact.name || "Tus datos"}</p>
+              <p className="font-semibold">{contact.patientName || "Paciente"}</p>
               <p className="truncate text-xs text-muted-foreground">
-                {contact.email || "Correo"} · {contact.comuna || "Comuna"}
+                Familiar: {contact.name || "Contacto"} · {contact.comuna || "Comuna"}
+              </p>
+              <p className="truncate text-xs text-muted-foreground">
+                {contact.email || "Correo"}
               </p>
             </div>
             <CheckCircle2 className="ml-auto size-4 text-emerald-600" />

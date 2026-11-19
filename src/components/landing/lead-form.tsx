@@ -59,22 +59,31 @@ export function LeadForm() {
         <div>
           <h3 className="font-heading text-xl font-bold">Solicita una evaluación</h3>
           <p className="mt-1 text-sm leading-6 text-muted-foreground">
-            Déjanos tus datos y te contactamos. Sin costo y sin compromiso.
+            Déjanos los datos del paciente y de quien coordina el cuidado. Sin costo y sin compromiso.
           </p>
         </div>
       </div>
 
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
-        <label className="space-y-1 text-xs font-medium">
-          Nombre
-          <Input name="name" required autoComplete="name" placeholder="Tu nombre" />
+        <label className="space-y-1 text-xs font-medium sm:col-span-2">
+          Nombre del paciente
+          <Input
+            name="patient_name"
+            required
+            autoComplete="off"
+            placeholder="Nombre de la persona que necesita cuidado"
+          />
         </label>
         <label className="space-y-1 text-xs font-medium">
-          Correo
+          Tu nombre (familiar)
+          <Input name="name" required autoComplete="name" placeholder="Quién coordina el cuidado" />
+        </label>
+        <label className="space-y-1 text-xs font-medium">
+          Correo de contacto
           <Input name="email" type="email" required autoComplete="email" placeholder="tu@correo.cl" />
         </label>
         <label className="space-y-1 text-xs font-medium">
-          Teléfono
+          Teléfono de contacto
           <Input name="phone" type="tel" autoComplete="tel" placeholder="+56 9 ..." />
         </label>
         <label className="space-y-1 text-xs font-medium">

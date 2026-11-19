@@ -404,6 +404,7 @@ export type Database = {
           message: string | null
           name: string
           needs: Json
+          patient_name: string | null
           phone: string | null
           plan_id: string | null
           source: string
@@ -419,6 +420,7 @@ export type Database = {
           message?: string | null
           name: string
           needs?: Json
+          patient_name?: string | null
           phone?: string | null
           plan_id?: string | null
           source?: string
@@ -434,6 +436,7 @@ export type Database = {
           message?: string | null
           name?: string
           needs?: Json
+          patient_name?: string | null
           phone?: string | null
           plan_id?: string | null
           source?: string

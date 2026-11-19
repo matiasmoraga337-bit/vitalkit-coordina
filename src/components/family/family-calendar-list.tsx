@@ -1,6 +1,3 @@
-"use client";
-
-import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, CalendarX2 } from "lucide-react";
 import { endOfWeek, format, isSameWeek, parseISO, startOfWeek } from "date-fns";
@@ -9,16 +6,8 @@ import { EmptyState } from "@/components/app/empty-state";
 import { VisitStatusBadge } from "@/components/app/status-badge";
 import { buttonVariants } from "@/components/ui/button";
 import type { FamilyVisit } from "@/lib/data/family";
-import { disciplineMeta, type Discipline } from "@/lib/mock-data";
+import { disciplineMeta } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
-
-const filterOptions: Array<{ id: "all" | Discipline; label: string }> = [
-  { id: "all", label: "Todas" },
-  { id: "kinesiologia", label: "Kinesiología" },
-  { id: "nutricion", label: "Nutrición" },
-  { id: "enfermeria", label: "Enfermería" },
-  { id: "aseo", label: "Aseo" },
-];
 
 function groupByWeek(visits: FamilyVisit[]) {
   const groups = new Map<string, { label: string; visits: FamilyVisit[] }>();
@@ -62,20 +51,13 @@ function VisitRow({ visit }: { visit: FamilyVisit }) {
 }
 
 export function FamilyCalendarList({ visits }: { visits: FamilyVisit[] }) {
-  const [filter, setFilter] = useState<"all" | Discipline>("all");
-
-  const filtered = useMemo(
-    () => visits.filter((visit) => filter === "all" || visit.discipline === filter),
-    [filter, visits],
-  );
-
-  const upcoming = filtered.filter(
+  const upcoming = visits.filter(
     (visit) =>
       visit.status === "scheduled" ||
       visit.status === "confirmed" ||
       visit.status === "in_progress",
   );
-  const past = filtered.filter(
+  const past = visits.filter(
     (visit) => visit.status === "completed" || visit.status === "cancelled",
   );
   const now = new Date();
@@ -88,24 +70,6 @@ export function FamilyCalendarList({ visits }: { visits: FamilyVisit[] }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap gap-2">
-        {filterOptions.map((option) => (
-          <button
-            key={option.id}
-            type="button"
-            onClick={() => setFilter(option.id)}
-            className={cn(
-              "rounded-full border px-3 py-1.5 text-xs font-semibold",
-              filter === option.id
-                ? "border-primary bg-primary text-primary-foreground"
-                : "bg-background text-muted-foreground hover:bg-muted",
-            )}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
-
       {thisWeek.length > 0 && (
         <section className="space-y-2">
           <h2 className="font-heading text-lg font-bold">Esta semana</h2>

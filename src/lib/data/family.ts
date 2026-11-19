@@ -182,7 +182,7 @@ export async function getFamilyDashboard(
         visit.discipline) as Discipline;
       return [
         visit.id,
-        `${professionalRole[discipline]} ? ${formatVisitDate(visit.scheduled_at)} ${formatVisitTime(visit.scheduled_at)}`,
+        `${professionalRole[discipline]} · ${formatVisitDate(visit.scheduled_at)} ${formatVisitTime(visit.scheduled_at)}`,
       ];
     }),
   );

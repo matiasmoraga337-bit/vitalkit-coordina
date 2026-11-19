@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
@@ -39,10 +40,9 @@ export default async function FamilyInvoicePage() {
     <>
       <div className="space-y-6">
         <PageHeader
-          eyebrow="Facturación"
-          title="Tus facturas"
-          description="Un solo cobro mensual por el plan y las visitas extra."
-          backHref="/inicio"
+          title="Factura"
+          description="Tu plan mensual y las visitas extra, en un solo lugar."
+          backHref="/plan"
         />
 
         {invoices.length === 0 ? (
@@ -51,14 +51,16 @@ export default async function FamilyInvoicePage() {
           <div className="grid gap-4">
             {invoices.map((invoice) => (
               <Card key={invoice.id}>
-                <CardHeader className="flex-row items-start justify-between gap-4">
+                <CardHeader>
                   <div>
                     <CardDescription>Período {invoice.period}</CardDescription>
                     <CardTitle className="text-xl">Factura mensual</CardTitle>
                   </div>
-                  <Badge variant="outline" className="rounded-full">
-                    {statusLabel[invoice.status] ?? invoice.status}
-                  </Badge>
+                  <CardAction>
+                    <Badge variant="outline" className="rounded-full">
+                      {statusLabel[invoice.status] ?? invoice.status}
+                    </Badge>
+                  </CardAction>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid gap-3 sm:grid-cols-3">

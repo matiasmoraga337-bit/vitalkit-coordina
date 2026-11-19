@@ -20,6 +20,14 @@ export function FamilyRequestsPanel({
 }) {
   return (
     <div className="space-y-3">
+      <Link
+        href="/solicitudes?pedir=1&type=extra_visit"
+        className={cn(buttonVariants(), "w-full")}
+      >
+        <Plus className="size-4" />
+        Nueva solicitud
+      </Link>
+
       {initialRequests.length === 0 ? (
         <EmptyState
           icon={Inbox}
@@ -57,14 +65,6 @@ export function FamilyRequestsPanel({
           </div>
         ))
       )}
-
-      <Link
-        href="/solicitudes?pedir=1&type=extra_visit"
-        className={cn(buttonVariants({ variant: "outline" }), "w-full")}
-      >
-        <Plus className="size-4" />
-        Nueva solicitud
-      </Link>
     </div>
   );
 }

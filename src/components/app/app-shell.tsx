@@ -14,7 +14,6 @@ import {
   LogOut,
   Menu,
   MessageCircle,
-  Receipt,
   UserCheck,
   UserPlus,
   Users,
@@ -62,10 +61,8 @@ const roleConfig: Record<
     nav: [
       { label: "Inicio", href: "/inicio", icon: Home },
       { label: "Calendario", href: "/calendario", icon: CalendarDays },
-      { label: "Solicitudes", href: "/solicitudes", icon: Inbox },
-      { label: "Plan de cuidados", href: "/plan", icon: ClipboardList },
-      { label: "Factura", href: "/factura", icon: Receipt },
       { label: "Mensajes", href: "/mensajes", icon: MessageCircle },
+      { label: "Mi cuidado", href: "/plan", icon: ClipboardList },
     ],
   },
   coordinator: {
@@ -151,7 +148,15 @@ function SidebarContent({ role, user }: { role: Role; user?: { name: string; det
       <nav className="flex-1 space-y-1 overflow-y-auto p-3" aria-label="Navegación principal">
         {config.nav.map((item) => {
           const Icon = item.icon;
-          const active = pathname === item.href;
+          const active =
+            pathname === item.href ||
+            (role === "family" &&
+              item.href === "/plan" &&
+              (pathname.startsWith("/solicitudes") ||
+                pathname.startsWith("/factura"))) ||
+            (role === "family" &&
+              item.href === "/calendario" &&
+              pathname.startsWith("/visitas"));
 
           if (item.disabled) {
             return (
