@@ -39,13 +39,14 @@ import { FamilyAppDemo } from "./family-app-demo";
 import {
   buildDemoFrequency,
   buildDemoGoals,
+  createDemoSlots,
   defaultContact,
   defaultSurvey,
-  demoSlots,
   disciplineOrder,
   recommendAllocation,
   type DemoAllocation,
   type DemoContact,
+  type DemoSlot,
   type DemoSurvey,
 } from "./demo-types";
 
@@ -76,27 +77,34 @@ const heroImages = [
   { src: "/landing/cleaner.webp", alt: "Aseo especializado" },
 ];
 
-export function FullJourneyDemo() {
+export function FullJourneyDemo({
+  initialSlots,
+}: {
+  initialSlots: DemoSlot[];
+}) {
   const [stage, setStage] = useState<Stage>("landing");
   const [planId, setPlanId] = useState<PlanId>("integral");
   const [contact, setContact] = useState<DemoContact>(defaultContact);
   const [survey, setSurvey] = useState<DemoSurvey>(defaultSurvey);
-  const [slotId, setSlotId] = useState(demoSlots[0].id);
+  const [slots, setSlots] = useState<DemoSlot[]>(initialSlots);
+  const [slotId, setSlotId] = useState(initialSlots[0]?.id ?? "");
   const [allocation, setAllocation] = useState<DemoAllocation>(() =>
     recommendAllocation(planById.integral, defaultSurvey),
   );
   const [paymentReference, setPaymentReference] = useState<string | null>(null);
   const plan = planById[planId];
-  const slot = demoSlots.find((item) => item.id === slotId) ?? demoSlots[0];
+  const slot = slots.find((item) => item.id === slotId) ?? slots[0];
   const recommended = recommendAllocation(plan, survey);
   const stageIndex = stageOrder.indexOf(stage);
 
   function resetDemo() {
+    const nextSlots = createDemoSlots();
     setStage("landing");
     setPlanId("integral");
     setContact(defaultContact);
     setSurvey(defaultSurvey);
-    setSlotId(demoSlots[0].id);
+    setSlots(nextSlots);
+    setSlotId(nextSlots[0]?.id ?? "");
     setAllocation(recommendAllocation(planById.integral, defaultSurvey));
     setPaymentReference(null);
   }
@@ -224,6 +232,7 @@ export function FullJourneyDemo() {
       {stage === "evaluation" && (
         <DemoEvaluationStep
           patientName={contact.patientName}
+          slots={slots}
           slotId={slotId}
           onSelect={setSlotId}
           onBack={() => setStage("survey")}
@@ -243,7 +252,7 @@ export function FullJourneyDemo() {
         />
       )}
 
-      {stage === "app" && (
+      {stage === "app" && slot && (
         <FamilyAppDemo
           plan={plan}
           allocation={allocation}
@@ -686,12 +695,14 @@ function SurveyQuestion({
 
 function DemoEvaluationStep({
   patientName,
+  slots,
   slotId,
   onSelect,
   onBack,
   onContinue,
 }: {
   patientName: string;
+  slots: DemoSlot[];
   slotId: string;
   onSelect: (id: string) => void;
   onBack: () => void;
@@ -720,7 +731,12 @@ function DemoEvaluationStep({
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_0.8fr]">
         <div className="space-y-3">
-          {demoSlots.map((slot) => {
+          {slots.length === 0 && (
+            <p className="rounded-2xl border bg-card p-4 text-sm text-muted-foreground">
+              Cargando horarios disponibles...
+            </p>
+          )}
+          {slots.map((slot) => {
             const selected = slot.id === slotId;
             return (
               <button
