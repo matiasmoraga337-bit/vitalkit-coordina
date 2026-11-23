@@ -45,29 +45,54 @@ export const defaultSurvey: DemoSurvey = {
   concerns: ["Movilidad", "Medicación"],
 };
 
-export const demoSlots: DemoSlot[] = [
-  {
-    id: "manana",
-    day: "Mañana",
-    date: "20 nov",
-    time: "10:00",
-    coordinator: "Valentina Soto",
-  },
-  {
-    id: "jueves",
-    day: "Jueves",
-    date: "21 nov",
-    time: "15:30",
-    coordinator: "Valentina Soto",
-  },
-  {
-    id: "viernes",
-    day: "Viernes",
-    date: "22 nov",
-    time: "09:00",
-    coordinator: "Valentina Soto",
-  },
-];
+export function createDemoSlots(now = new Date()): DemoSlot[] {
+  const today = new Date(now);
+  today.setHours(12, 0, 0, 0);
+
+  const weekday = new Intl.DateTimeFormat("es-CL", { weekday: "long" });
+  const shortDate = new Intl.DateTimeFormat("es-CL", {
+    day: "numeric",
+    month: "short",
+  });
+
+  return [
+    { id: "manana", businessDays: 1, time: "10:00" },
+    { id: "siguiente", businessDays: 3, time: "15:30" },
+    { id: "ultimo", businessDays: 4, time: "09:00" },
+  ].map(({ id, businessDays, time }) => {
+    const date = addBusinessDays(today, businessDays);
+    const diffDays = Math.round(
+      (date.getTime() - today.getTime()) / 86_400_000,
+    );
+    const day =
+      diffDays === 1
+        ? "Mañana"
+        : weekday
+            .format(date)
+            .replace(/^./, (letter) => letter.toUpperCase());
+
+    return {
+      id,
+      day,
+      date: shortDate.format(date).replace(/\.$/, ""),
+      time,
+      coordinator: "Valentina Soto",
+    };
+  });
+}
+
+function addBusinessDays(start: Date, days: number) {
+  const date = new Date(start);
+  let added = 0;
+
+  while (added < days) {
+    date.setDate(date.getDate() + 1);
+    const weekday = date.getDay();
+    if (weekday !== 0 && weekday !== 6) added += 1;
+  }
+
+  return date;
+}
 
 export const disciplineOrder: Discipline[] = [
   "kinesiologia",
